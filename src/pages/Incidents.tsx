@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Plus, Search, AlertTriangle } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Plus, Search, AlertTriangle, X } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import type { Severity, IncidentStatus } from '@/types'
 
@@ -98,11 +98,57 @@ const statusLabel: Record<IncidentStatus, string> = {
 type SeverityFilter = Severity | 'all'
 type StatusFilter = IncidentStatus | 'all'
 
+interface NewIncidentForm {
+  title: string
+  service: string
+  severity: Severity
+  assignee: string
+}
+
+const emptyForm: NewIncidentForm = { title: '', service: '', severity: 'medium', assignee: '' }
+
 export default function Incidents() {
   const [search, setSearch] = useState('')
   const [filterSeverity, setFilterSeverity] = useState<SeverityFilter>('all')
   const [filterStatus, setFilterStatus] = useState<StatusFilter>('all')
   const [incidents, setIncidents] = useState(mockIncidents)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [form, setForm] = useState<NewIncidentForm>(emptyForm)
+  const modalRef = useRef<HTMLDivElement>(null)
+  const titleRef = useRef<HTMLInputElement>(null)
+
+  const closeModal = () => setModalOpen(false)
+
+  const openModal = () => {
+    setForm(emptyForm)
+    setModalOpen(true)
+  }
+
+  useEffect(() => {
+    if (!modalOpen) return
+    titleRef.current?.focus()
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeModal()
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [modalOpen])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.title.trim()) return
+    const newIncident: MockIncident = {
+      id: String(Date.now()),
+      title: form.title.trim(),
+      service: form.service.trim() || 'Unknown Service',
+      severity: form.severity,
+      status: 'open',
+      createdAt: new Date().toISOString(),
+      assignee: form.assignee.trim() || 'Unassigned',
+    }
+    setIncidents((prev) => [newIncident, ...prev])
+    closeModal()
+  }
 
   const filtered = incidents
     .filter((i) => i.title.toLowerCase().includes(search.toLowerCase()))
@@ -136,6 +182,7 @@ export default function Incidents() {
           </p>
         </div>
         <button
+          onClick={openModal}
           className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all active:scale-[0.98]"
           style={{ background: 'var(--accent)', boxShadow: '0 2px 8px rgba(124,58,237,0.3)' }}
           onMouseEnter={(e) => {
@@ -225,6 +272,199 @@ export default function Incidents() {
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
               No incidents match the current filters.
             </p>
+          </div>
+        )}
+
+        {/* New Incident Modal */}
+        {modalOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: 'rgba(0,0,0,0.5)' }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) closeModal()
+            }}
+          >
+            <div
+              ref={modalRef}
+              className="w-full max-w-md overflow-hidden rounded-2xl"
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                boxShadow: 'var(--shadow-xl)',
+              }}
+            >
+              <div
+                className="flex items-center justify-between px-5 py-4"
+                style={{ borderBottom: '1px solid var(--border)' }}
+              >
+                <h2 className="text-sm font-semibold" style={{ color: 'var(--text-h)' }}>
+                  New Incident
+                </h2>
+                <button
+                  onClick={closeModal}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+                  style={{ color: 'var(--text-muted)' }}
+                  onMouseEnter={(e) => {
+                    ;(e.currentTarget as HTMLElement).style.background = 'var(--code-bg)'
+                    ;(e.currentTarget as HTMLElement).style.color = 'var(--text-h)'
+                  }}
+                  onMouseLeave={(e) => {
+                    ;(e.currentTarget as HTMLElement).style.background = ''
+                    ;(e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-5">
+                <div>
+                  <label
+                    className="mb-1.5 block text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: 'var(--text-muted)' }}
+                  >
+                    Title *
+                  </label>
+                  <input
+                    ref={titleRef}
+                    value={form.title}
+                    onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                    placeholder="Brief description of the incident"
+                    required
+                    className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-all"
+                    style={{
+                      borderColor: 'var(--border)',
+                      background: 'var(--bg)',
+                      color: 'var(--text-h)',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--accent)'
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border)'
+                    }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label
+                      className="mb-1.5 block text-xs font-semibold uppercase tracking-wider"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      Service
+                    </label>
+                    <input
+                      value={form.service}
+                      onChange={(e) => setForm((f) => ({ ...f, service: e.target.value }))}
+                      placeholder="e.g. API Gateway"
+                      className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-all"
+                      style={{
+                        borderColor: 'var(--border)',
+                        background: 'var(--bg)',
+                        color: 'var(--text-h)',
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = 'var(--accent)'
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = 'var(--border)'
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className="mb-1.5 block text-xs font-semibold uppercase tracking-wider"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      Severity
+                    </label>
+                    <select
+                      value={form.severity}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, severity: e.target.value as Severity }))
+                      }
+                      className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-all"
+                      style={{
+                        borderColor: 'var(--border)',
+                        background: 'var(--bg)',
+                        color: 'var(--text-h)',
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = 'var(--accent)'
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = 'var(--border)'
+                      }}
+                    >
+                      <option value="critical">Critical</option>
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    className="mb-1.5 block text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: 'var(--text-muted)' }}
+                  >
+                    Assignee
+                  </label>
+                  <input
+                    value={form.assignee}
+                    onChange={(e) => setForm((f) => ({ ...f, assignee: e.target.value }))}
+                    placeholder="e.g. Aditya K."
+                    className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-all"
+                    style={{
+                      borderColor: 'var(--border)',
+                      background: 'var(--bg)',
+                      color: 'var(--text-h)',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--accent)'
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border)'
+                    }}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="rounded-xl px-4 py-2 text-sm font-medium transition-colors"
+                    style={{ color: 'var(--text)', border: '1px solid var(--border)' }}
+                    onMouseEnter={(e) => {
+                      ;(e.currentTarget as HTMLElement).style.background = 'var(--code-bg)'
+                    }}
+                    onMouseLeave={(e) => {
+                      ;(e.currentTarget as HTMLElement).style.background = ''
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all active:scale-[0.98]"
+                    style={{
+                      background: 'var(--accent)',
+                      boxShadow: '0 2px 8px rgba(124,58,237,0.3)',
+                    }}
+                    onMouseEnter={(e) => {
+                      ;(e.currentTarget as HTMLElement).style.background = 'var(--accent-hover)'
+                    }}
+                    onMouseLeave={(e) => {
+                      ;(e.currentTarget as HTMLElement).style.background = 'var(--accent)'
+                    }}
+                  >
+                    Create Incident
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
 

@@ -17,6 +17,7 @@ import {
   TrendingDown,
   Minus,
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { Avatar } from '@/components/Avatar/Avatar'
 import type { Severity, IncidentStatus, ServiceStatus, AvatarStatus } from '@/types'
 
@@ -146,6 +147,7 @@ function StatCard({
   trendLabel,
   iconBg,
   iconColor,
+  onClick,
 }: {
   icon: typeof Activity
   label: string
@@ -154,6 +156,7 @@ function StatCard({
   trendLabel: string
   iconBg: string
   iconColor: string
+  onClick?: () => void
 }) {
   const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus
   const trendColor =
@@ -166,7 +169,9 @@ function StatCard({
         background: 'var(--surface)',
         border: '1px solid var(--border)',
         boxShadow: 'var(--shadow-xs)',
+        cursor: onClick ? 'pointer' : 'default',
       }}
+      onClick={onClick}
       onMouseEnter={(e) => {
         ;(e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-md)'
         ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'
@@ -246,6 +251,7 @@ function SectionTitle({ title, count }: { title: string; count?: number }) {
 
 /* ── Dashboard ─────────────────────────────────────────────────────────────── */
 export default function Dashboard() {
+  const navigate = useNavigate()
   const openCount = mockIncidents.filter((i) => i.status === 'open').length
   const degradedCount = mockServices.filter((s) => s.status !== 'operational').length
 
@@ -274,6 +280,7 @@ export default function Dashboard() {
           trendLabel="Active right now"
           iconBg="var(--danger-bg)"
           iconColor="var(--danger)"
+          onClick={() => navigate('/incidents')}
         />
         <StatCard
           icon={Server}
@@ -283,6 +290,7 @@ export default function Dashboard() {
           trendLabel={`of ${mockServices.length} services`}
           iconBg="rgba(234,88,12,0.1)"
           iconColor="#ea580c"
+          onClick={() => navigate('/services')}
         />
         <StatCard
           icon={Activity}
@@ -292,6 +300,7 @@ export default function Dashboard() {
           trendLabel="Last 7 days"
           iconBg="var(--success-bg)"
           iconColor="var(--success)"
+          onClick={() => navigate('/services')}
         />
         <StatCard
           icon={Users}
@@ -301,6 +310,7 @@ export default function Dashboard() {
           trendLabel="Engineer active"
           iconBg="var(--accent-bg)"
           iconColor="var(--accent)"
+          onClick={() => navigate('/oncall')}
         />
       </div>
 

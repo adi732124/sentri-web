@@ -11,6 +11,7 @@ import {
   Sun,
   ChevronDown,
   Zap,
+  CheckCheck,
 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import clsx from 'clsx'
@@ -40,6 +41,12 @@ function useDarkMode() {
   return { dark, toggle: () => setDark((d) => !d) }
 }
 
+const mockNotifications = [
+  { id: '1', title: 'API Gateway 503s in eu-west', time: '2m ago', unread: true },
+  { id: '2', title: 'Webhook Worker elevated errors', time: '15m ago', unread: true },
+  { id: '3', title: 'Auth Service memory pressure resolved', time: '1h ago', unread: false },
+]
+
 export function MainLayout() {
   useSocket()
   const { dark, toggle } = useDarkMode()
@@ -47,6 +54,10 @@ export function MainLayout() {
   const { user, logout } = useAuthStore()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [notifications, setNotifications] = useState(mockNotifications)
+  const notifRef = useRef<HTMLDivElement>(null)
+  const unreadCount = notifications.filter((n) => n.unread).length
 
   useEffect(() => {
     if (!userMenuOpen) return
@@ -58,6 +69,19 @@ export function MainLayout() {
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [userMenuOpen])
+
+  useEffect(() => {
+    if (!notifOpen) return
+    const handler = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [notifOpen])
+
+  const markAllRead = () => setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })))
 
   const handleLogout = () => {
     setUserMenuOpen(false)
@@ -223,22 +247,115 @@ export function MainLayout() {
             </button>
 
             {/* Notifications */}
-            <button
-              className="relative flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-150"
-              style={{ color: 'var(--text)' }}
-              onMouseEnter={(e) => {
-                ;(e.currentTarget as HTMLElement).style.background = 'var(--code-bg)'
-              }}
-              onMouseLeave={(e) => {
-                ;(e.currentTarget as HTMLElement).style.background = ''
-              }}
-            >
-              <Bell size={16} strokeWidth={1.75} />
-              <span
-                className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full"
-                style={{ background: 'var(--danger)', boxShadow: '0 0 0 2px var(--surface)' }}
-              />
-            </button>
+            <div ref={notifRef} className="relative">
+              <button
+                onClick={() => setNotifOpen((o) => !o)}
+                className="relative flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-150"
+                style={{
+                  color: 'var(--text)',
+                  background: notifOpen ? 'var(--code-bg)' : '',
+                }}
+                onMouseEnter={(e) => {
+                  if (!notifOpen)
+                    (e.currentTarget as HTMLElement).style.background = 'var(--code-bg)'
+                }}
+                onMouseLeave={(e) => {
+                  if (!notifOpen) (e.currentTarget as HTMLElement).style.background = ''
+                }}
+              >
+                <Bell size={16} strokeWidth={1.75} />
+                {unreadCount > 0 && (
+                  <span
+                    className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full"
+                    style={{ background: 'var(--danger)', boxShadow: '0 0 0 2px var(--surface)' }}
+                  />
+                )}
+              </button>
+
+              {notifOpen && (
+                <div
+                  className="absolute right-0 top-full z-50 mt-1.5 w-72 overflow-hidden rounded-xl"
+                  style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    boxShadow: 'var(--shadow-lg)',
+                  }}
+                >
+                  <div
+                    className="flex items-center justify-between px-4 py-2.5"
+                    style={{ borderBottom: '1px solid var(--border)' }}
+                  >
+                    <p className="text-sm font-semibold" style={{ color: 'var(--text-h)' }}>
+                      Notifications
+                      {unreadCount > 0 && (
+                        <span
+                          className="ml-2 rounded-full px-1.5 py-0.5 text-[10px] font-bold"
+                          style={{ background: 'var(--danger)', color: '#fff' }}
+                        >
+                          {unreadCount}
+                        </span>
+                      )}
+                    </p>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={markAllRead}
+                        className="flex items-center gap-1 text-xs transition-colors"
+                        style={{ color: 'var(--accent)' }}
+                      >
+                        <CheckCheck size={12} />
+                        Mark all read
+                      </button>
+                    )}
+                  </div>
+                  <div className="max-h-64 overflow-y-auto">
+                    {notifications.map((n) => (
+                      <div
+                        key={n.id}
+                        className="flex items-start gap-3 px-4 py-3 transition-colors"
+                        style={{
+                          background: n.unread ? 'var(--accent-bg)' : '',
+                          borderBottom: '1px solid var(--border)',
+                          cursor: 'default',
+                        }}
+                      >
+                        {n.unread && (
+                          <span
+                            className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                            style={{ background: 'var(--accent)' }}
+                          />
+                        )}
+                        <div className={n.unread ? '' : 'pl-[18px]'}>
+                          <p className="text-xs font-medium" style={{ color: 'var(--text-h)' }}>
+                            {n.title}
+                          </p>
+                          <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                            {n.time}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="p-2">
+                    <button
+                      onClick={() => {
+                        setNotifOpen(false)
+                        navigate('/incidents')
+                      }}
+                      className="w-full rounded-lg py-2 text-xs font-medium transition-colors"
+                      style={{ color: 'var(--accent)' }}
+                      onMouseEnter={(e) => {
+                        ;(e.currentTarget as HTMLElement).style.background = 'var(--accent-bg)'
+                      }}
+                      onMouseLeave={(e) => {
+                        ;(e.currentTarget as HTMLElement).style.background = ''
+                      }}
+                    >
+                      View all incidents
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* User menu */}
             <div ref={userMenuRef} className="relative ml-1">
