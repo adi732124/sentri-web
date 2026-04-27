@@ -1,3 +1,6 @@
+export { PageLoader } from './PageLoader/PageLoader'
+export type { PageLoaderProps } from './PageLoader/PageLoader'
+
 export { Button } from './Button/Button'
 export type { ButtonProps, ButtonVariant, ButtonSize } from './Button/Button'
 
