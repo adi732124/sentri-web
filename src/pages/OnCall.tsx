@@ -1,89 +1,195 @@
-import { Avatar, Badge, Card } from '../components'
+import { useState, useCallback } from 'react'
+import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { GripVertical, Phone } from 'lucide-react'
+import clsx from 'clsx'
+import { Avatar } from '@/components/Avatar/Avatar'
+import type { AvatarStatus } from '@/types'
 
-const schedule = [
-  { week: 'This week (Apr 28 – May 4)', primary: { name: 'Aditya Kumar', status: 'online' as const }, backup: { name: 'Sara Mehta', status: 'away' as const } },
-  { week: 'Next week (May 5 – May 11)', primary: { name: 'Sara Mehta', status: 'away' as const }, backup: { name: 'John Davis', status: 'offline' as const } },
-  { week: 'May 12 – May 18', primary: { name: 'John Davis', status: 'offline' as const }, backup: { name: 'Aditya Kumar', status: 'online' as const } },
+interface RotationItem {
+  id: string
+  week: string
+  primary: { name: string; status: AvatarStatus }
+  backup: { name: string; status: AvatarStatus }
+}
+
+const initialSchedule: RotationItem[] = [
+  {
+    id: '1',
+    week: 'This week (Apr 28 – May 4)',
+    primary: { name: 'Aditya Kumar', status: 'online' },
+    backup: { name: 'Sara Mehta', status: 'away' },
+  },
+  {
+    id: '2',
+    week: 'Next week (May 5 – May 11)',
+    primary: { name: 'Sara Mehta', status: 'away' },
+    backup: { name: 'John Davis', status: 'offline' },
+  },
+  {
+    id: '3',
+    week: 'May 12 – May 18',
+    primary: { name: 'John Davis', status: 'offline' },
+    backup: { name: 'Aditya Kumar', status: 'online' },
+  },
 ]
 
 const escalation = [
   { step: 1, label: 'Primary on-call', timeout: '10 min', name: 'Aditya Kumar' },
   { step: 2, label: 'Backup on-call', timeout: '10 min', name: 'Sara Mehta' },
-  { step: 3, label: 'Engineering Manager', timeout: '—', name: 'John Davis' },
+  { step: 3, label: 'Engineering Manager', timeout: null, name: 'John Davis' },
 ]
 
-export default function OnCall() {
+function SortableRow({ item, isFirst }: { item: RotationItem; isFirst: boolean }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
   return (
-    <div style={{ padding: '32px 24px', maxWidth: 1100, margin: '0 auto' }}>
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ margin: '0 0 8px', fontSize: 28 }}>On-Call Schedule</h1>
-        <p style={{ margin: 0, color: 'var(--text)' }}>Rotation and escalation policy for the engineering team.</p>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={clsx(
+        'flex items-center justify-between gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3',
+        isDragging && 'opacity-50 shadow-sentri',
+      )}
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="cursor-grab text-[var(--text)] hover:text-[var(--text-h)] active:cursor-grabbing"
+      >
+        <GripVertical size={14} />
+      </button>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          {isFirst && (
+            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600">
+              Current
+            </span>
+          )}
+          <span className="text-sm font-medium text-[var(--text-h)]">{item.week}</span>
+        </div>
       </div>
 
-      {/* Current on-call */}
-      <Card title="Currently On-Call" bordered shadow style={{ marginBottom: 32 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-          <Avatar name="Aditya Kumar" size="lg" status="online" />
+      <div className="flex flex-wrap items-center gap-6">
+        <div className="flex items-center gap-2">
+          <Avatar name={item.primary.name} size="xs" status={item.primary.status} />
           <div>
-            <div style={{ fontWeight: 600, fontSize: 16, color: 'var(--text-h)' }}>Aditya Kumar</div>
-            <div style={{ fontSize: 13, color: 'var(--text)', marginTop: 2 }}>This week · Primary</div>
+            <div className="text-xs text-[var(--text)]">Primary</div>
+            <div className="text-sm font-medium text-[var(--text-h)]">{item.primary.name}</div>
           </div>
-          <Badge variant="success" dot>Active</Badge>
         </div>
-      </Card>
+        <div className="flex items-center gap-2">
+          <Avatar name={item.backup.name} size="xs" status={item.backup.status} />
+          <div>
+            <div className="text-xs text-[var(--text)]">Backup</div>
+            <div className="text-sm font-medium text-[var(--text-h)]">{item.backup.name}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
-      {/* Rotation schedule */}
-      <section style={{ marginBottom: 40 }}>
-        <h2 style={{ fontSize: 16, margin: '0 0 16px', color: 'var(--text-h)' }}>Rotation Schedule</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {schedule.map((row, i) => (
-            <Card key={row.week} bordered>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text-h)', minWidth: 220 }}>
-                  {i === 0 && <Badge variant="info" size="sm" style={{ marginRight: 8 }}>Current</Badge>}
-                  {row.week}
-                </div>
-                <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Avatar name={row.primary.name} size="sm" status={row.primary.status} />
-                    <div>
-                      <div style={{ fontSize: 12, color: 'var(--text)' }}>Primary</div>
-                      <div style={{ fontSize: 13, color: 'var(--text-h)', fontWeight: 500 }}>{row.primary.name}</div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Avatar name={row.backup.name} size="sm" status={row.backup.status} />
-                    <div>
-                      <div style={{ fontSize: 12, color: 'var(--text)' }}>Backup</div>
-                      <div style={{ fontSize: 13, color: 'var(--text-h)', fontWeight: 500 }}>{row.backup.name}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
+export default function OnCall() {
+  const [schedule, setSchedule] = useState(initialSchedule)
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      setSchedule((items) => {
+        const oldIdx = items.findIndex((i) => i.id === active.id)
+        const newIdx = items.findIndex((i) => i.id === over.id)
+        return arrayMove(items, oldIdx, newIdx)
+      })
+    }
+  }, [])
+
+  const current = schedule[0]
+
+  return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-[var(--text-h)]">On-Call Schedule</h1>
+        <p className="mt-1 text-sm text-[var(--text)]">
+          Rotation and escalation policy for the engineering team.
+        </p>
+      </div>
+
+      {/* Currently on-call hero */}
+      <div className="mb-6 flex items-center gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg)] px-5 py-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
+            <Phone size={18} />
+          </div>
+          <div>
+            <div className="text-xs font-medium uppercase tracking-wide text-[var(--text)]">
+              Currently On-Call
+            </div>
+            <div className="text-base font-semibold text-[var(--text-h)]">
+              {current.primary.name}
+            </div>
+            <div className="text-xs text-[var(--text)]">{current.week} · Primary</div>
+          </div>
         </div>
+        <span className="ml-auto rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600">
+          Active
+        </span>
+      </div>
+
+      {/* Rotation schedule (drag-to-reorder) */}
+      <section className="mb-8">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-[var(--text-h)]">Rotation Schedule</h2>
+          <span className="text-xs text-[var(--text)]">Drag rows to reorder</span>
+        </div>
+
+        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={schedule.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+            <div className="flex flex-col gap-2">
+              {schedule.map((item, i) => (
+                <SortableRow key={item.id} item={item} isFirst={i === 0} />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       </section>
 
       {/* Escalation policy */}
       <section>
-        <h2 style={{ fontSize: 16, margin: '0 0 16px', color: 'var(--text-h)' }}>Escalation Policy</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <h2 className="mb-3 text-sm font-semibold text-[var(--text-h)]">Escalation Policy</h2>
+        <div className="flex flex-col gap-2">
           {escalation.map((e) => (
-            <Card key={e.step} bordered>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13, color: 'var(--accent)', flexShrink: 0 }}>
-                  {e.step}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 500, fontSize: 14, color: 'var(--text-h)' }}>{e.label}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text)' }}>{e.name}</div>
-                </div>
-                {e.timeout !== '—' && (
-                  <Badge variant="neutral" size="sm">Escalate after {e.timeout}</Badge>
-                )}
+            <div
+              key={e.step}
+              className="flex items-center gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3"
+            >
+              <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[var(--accent-border)] bg-[var(--accent-bg)] text-xs font-bold text-[var(--accent)]">
+                {e.step}
               </div>
-            </Card>
+              <div className="flex-1">
+                <div className="text-sm font-medium text-[var(--text-h)]">{e.label}</div>
+                <div className="text-xs text-[var(--text)]">{e.name}</div>
+              </div>
+              {e.timeout && (
+                <span className="rounded-full bg-[var(--code-bg)] px-2.5 py-0.5 text-xs text-[var(--text)]">
+                  Escalate after {e.timeout}
+                </span>
+              )}
+            </div>
           ))}
         </div>
       </section>
