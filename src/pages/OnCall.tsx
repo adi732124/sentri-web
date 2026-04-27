@@ -7,7 +7,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Phone } from 'lucide-react'
+import { GripVertical, Phone, Clock } from 'lucide-react'
 import clsx from 'clsx'
 import { Avatar } from '@/components/Avatar/Avatar'
 import type { AvatarStatus } from '@/types'
@@ -51,52 +51,51 @@ function SortableRow({ item, isFirst }: { item: RotationItem; isFirst: boolean }
     id: item.id,
   })
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  }
-
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
       className={clsx(
-        'flex items-center justify-between gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3',
+        'flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3.5 transition-shadow sm:items-center',
         isDragging && 'opacity-50 shadow-sentri',
       )}
     >
+      {/* Drag handle */}
       <button
         {...attributes}
         {...listeners}
-        className="cursor-grab text-[var(--text)] hover:text-[var(--text-h)] active:cursor-grabbing"
+        className="mt-0.5 cursor-grab rounded-md p-1 text-[var(--text)] hover:bg-[var(--code-bg)] hover:text-[var(--text-h)] active:cursor-grabbing sm:mt-0"
       >
         <GripVertical size={14} />
       </button>
 
-      <div className="min-w-0 flex-1">
+      {/* Content */}
+      <div className="flex min-w-0 flex-1 flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+        {/* Week label */}
         <div className="flex items-center gap-2">
           {isFirst && (
-            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600">
+            <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-500">
               Current
             </span>
           )}
-          <span className="text-sm font-medium text-[var(--text-h)]">{item.week}</span>
+          <span className="text-sm font-semibold text-[var(--text-h)]">{item.week}</span>
         </div>
-      </div>
 
-      <div className="flex flex-wrap items-center gap-6">
-        <div className="flex items-center gap-2">
-          <Avatar name={item.primary.name} size="xs" status={item.primary.status} />
-          <div>
-            <div className="text-xs text-[var(--text)]">Primary</div>
-            <div className="text-sm font-medium text-[var(--text-h)]">{item.primary.name}</div>
+        {/* Primary + Backup */}
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2.5">
+            <Avatar name={item.primary.name} size="xs" status={item.primary.status} />
+            <div>
+              <p className="text-xs font-medium text-[var(--text)]">Primary</p>
+              <p className="text-sm font-semibold text-[var(--text-h)]">{item.primary.name}</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Avatar name={item.backup.name} size="xs" status={item.backup.status} />
-          <div>
-            <div className="text-xs text-[var(--text)]">Backup</div>
-            <div className="text-sm font-medium text-[var(--text-h)]">{item.backup.name}</div>
+          <div className="flex items-center gap-2.5">
+            <Avatar name={item.backup.name} size="xs" status={item.backup.status} />
+            <div>
+              <p className="text-xs font-medium text-[var(--text)]">Backup</p>
+              <p className="text-sm font-semibold text-[var(--text-h)]">{item.backup.name}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -121,40 +120,39 @@ export default function OnCall() {
   const current = schedule[0]
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-[var(--text-h)]">On-Call Schedule</h1>
-        <p className="mt-1 text-sm text-[var(--text)]">
+    <div className="p-4 sm:p-6">
+      {/* Page header */}
+      <div className="mb-5">
+        <h1 className="text-xl font-bold text-[var(--text-h)]">On-Call Schedule</h1>
+        <p className="mt-0.5 text-sm text-[var(--text)]">
           Rotation and escalation policy for the engineering team.
         </p>
       </div>
 
       {/* Currently on-call hero */}
-      <div className="mb-6 flex items-center gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg)] px-5 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
-            <Phone size={18} />
-          </div>
-          <div>
-            <div className="text-xs font-medium uppercase tracking-wide text-[var(--text)]">
-              Currently On-Call
-            </div>
-            <div className="text-base font-semibold text-[var(--text-h)]">
-              {current.primary.name}
-            </div>
-            <div className="text-xs text-[var(--text)]">{current.week} · Primary</div>
-          </div>
+      <div className="mb-6 flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg)] px-5 py-5">
+        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10">
+          <Phone size={20} className="text-emerald-500" strokeWidth={2} />
         </div>
-        <span className="ml-auto rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text)]">
+            Currently On-Call
+          </p>
+          <p className="mt-0.5 text-lg font-bold text-[var(--text-h)]">{current.primary.name}</p>
+          <p className="text-xs text-[var(--text)]">{current.week} · Primary</p>
+        </div>
+        <span className="flex-shrink-0 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-500">
           Active
         </span>
       </div>
 
-      {/* Rotation schedule (drag-to-reorder) */}
+      {/* Rotation schedule */}
       <section className="mb-8">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-[var(--text-h)]">Rotation Schedule</h2>
-          <span className="text-xs text-[var(--text)]">Drag rows to reorder</span>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-[var(--text)]">
+            Rotation Schedule
+          </h2>
+          <span className="text-xs text-[var(--text)]">Drag to reorder</span>
         </div>
 
         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -170,23 +168,34 @@ export default function OnCall() {
 
       {/* Escalation policy */}
       <section>
-        <h2 className="mb-3 text-sm font-semibold text-[var(--text-h)]">Escalation Policy</h2>
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--text)]">
+          Escalation Policy
+        </h2>
         <div className="flex flex-col gap-2">
           {escalation.map((e) => (
             <div
               key={e.step}
-              className="flex items-center gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3"
+              className="flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3.5"
             >
-              <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[var(--accent-border)] bg-[var(--accent-bg)] text-xs font-bold text-[var(--accent)]">
+              {/* Step number */}
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[var(--accent-bg)] text-xs font-bold text-[var(--accent)]">
                 {e.step}
               </div>
+
+              {/* Connector line (not last) */}
               <div className="flex-1">
-                <div className="text-sm font-medium text-[var(--text-h)]">{e.label}</div>
-                <div className="text-xs text-[var(--text)]">{e.name}</div>
+                <p className="text-sm font-semibold text-[var(--text-h)]">{e.label}</p>
+                <p className="text-xs text-[var(--text)]">{e.name}</p>
               </div>
-              {e.timeout && (
-                <span className="rounded-full bg-[var(--code-bg)] px-2.5 py-0.5 text-xs text-[var(--text)]">
-                  Escalate after {e.timeout}
+
+              {e.timeout ? (
+                <span className="flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-1 text-xs text-[var(--text)]">
+                  <Clock size={11} />
+                  {e.timeout}
+                </span>
+              ) : (
+                <span className="rounded-lg bg-[var(--accent-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--accent)]">
+                  Final
                 </span>
               )}
             </div>

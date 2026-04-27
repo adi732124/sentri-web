@@ -25,12 +25,12 @@ const initialMembers: Member[] = [
 
 const roleBadge: Record<WorkspaceRole, string> = {
   admin: 'bg-[var(--accent-bg)] text-[var(--accent)]',
-  developer: 'bg-emerald-500/10 text-emerald-600',
+  developer: 'bg-emerald-500/10 text-emerald-500',
   viewer: 'bg-[var(--code-bg)] text-[var(--text)]',
 }
 
 const inputCls =
-  'w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text-h)] placeholder-[var(--text)] outline-none transition-colors focus:border-[var(--accent)]'
+  'w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] px-3.5 py-2.5 text-sm text-[var(--text-h)] placeholder-[var(--text)] outline-none transition-colors focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-bg)]'
 
 function Section({
   title,
@@ -42,10 +42,10 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg)]">
+    <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg)]">
       <div className="border-b border-[var(--border)] px-5 py-4">
-        <div className="text-sm font-semibold text-[var(--text-h)]">{title}</div>
-        <div className="mt-0.5 text-xs text-[var(--text)]">{description}</div>
+        <p className="text-sm font-bold text-[var(--text-h)]">{title}</p>
+        <p className="mt-0.5 text-xs text-[var(--text)]">{description}</p>
       </div>
       <div className="p-5">{children}</div>
     </div>
@@ -82,20 +82,21 @@ export default function Settings() {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-[var(--text-h)]">Settings</h1>
-        <p className="mt-1 text-sm text-[var(--text)]">
+    <div className="p-4 sm:p-6">
+      {/* Page header */}
+      <div className="mb-5">
+        <h1 className="text-xl font-bold text-[var(--text-h)]">Settings</h1>
+        <p className="mt-0.5 text-sm text-[var(--text)]">
           Workspace configuration and team management.
         </p>
       </div>
 
-      <div className="mx-auto flex max-w-2xl flex-col gap-5">
+      <div className="mx-auto flex max-w-2xl flex-col gap-4">
         {/* Workspace */}
         <Section title="Workspace" description="General settings for your workspace.">
           <div className="flex flex-col gap-4">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-[var(--text-h)]">
+              <label className="mb-1.5 block text-xs font-semibold text-[var(--text-h)]">
                 Workspace name
               </label>
               <input
@@ -105,20 +106,22 @@ export default function Settings() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-[var(--text-h)]">Slug</label>
+              <label className="mb-1.5 block text-xs font-semibold text-[var(--text-h)]">
+                Slug
+              </label>
               <input
-                className={clsx(inputCls, 'cursor-not-allowed opacity-60')}
+                className={clsx(inputCls, 'cursor-not-allowed opacity-50')}
                 value="my-workspace"
                 disabled
               />
-              <p className="mt-1 text-xs text-[var(--text)]">
+              <p className="mt-1.5 text-xs text-[var(--text)]">
                 Used in URLs — contact support to change.
               </p>
             </div>
             <div className="flex justify-end">
               <button
                 onClick={() => toast.success('Workspace saved')}
-                className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                className="rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 active:scale-95"
               >
                 Save changes
               </button>
@@ -127,32 +130,34 @@ export default function Settings() {
         </Section>
 
         {/* Members */}
-        <Section title="Team Members" description="Manage roles and access.">
+        <Section title="Team Members" description="Manage roles and access for your team.">
           <div className="flex flex-col gap-3">
             {members.map((m) => (
-              <div key={m.id} className="flex items-center gap-3">
+              <div
+                key={m.id}
+                className="flex items-center gap-3 rounded-xl border border-[var(--border)] px-3.5 py-3"
+              >
                 <Avatar name={m.name} size="sm" status={m.status} />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium text-[var(--text-h)]">{m.name}</div>
-                  <div className="truncate text-xs text-[var(--text)]">{m.email}</div>
+                  <p className="truncate text-sm font-semibold text-[var(--text-h)]">{m.name}</p>
+                  <p className="truncate text-xs text-[var(--text)]">{m.email}</p>
                 </div>
                 <span
                   className={clsx(
-                    'rounded-full px-2.5 py-0.5 text-xs font-medium',
+                    'rounded-full px-2.5 py-0.5 text-xs font-semibold',
                     roleBadge[m.role],
                   )}
                 >
                   {m.role}
                 </span>
-                {m.role !== 'admin' && (
+                {m.role !== 'admin' ? (
                   <button
                     onClick={() => handleRemove(m.id)}
-                    className="rounded-md p-1.5 text-[var(--text)] transition-colors hover:bg-red-500/10 hover:text-red-500"
+                    className="rounded-lg p-1.5 text-[var(--text)] transition-colors hover:bg-red-500/10 hover:text-red-500"
                   >
                     <Trash2 size={13} />
                   </button>
-                )}
-                {m.role === 'admin' && (
+                ) : (
                   <div className="p-1.5 text-[var(--text)]">
                     <Shield size={13} />
                   </div>
@@ -166,7 +171,7 @@ export default function Settings() {
         <Section title="Invite Member" description="Send an invite link by email.">
           <form onSubmit={handleSubmit(handleInvite)} className="flex flex-col gap-4">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-[var(--text-h)]">
+              <label className="mb-1.5 block text-xs font-semibold text-[var(--text-h)]">
                 Email address
               </label>
               <input
@@ -175,21 +180,25 @@ export default function Settings() {
                 className={inputCls}
                 {...register('email')}
               />
-              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
+              {errors.email && (
+                <p className="mt-1.5 text-xs text-red-500">{errors.email.message}</p>
+              )}
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-[var(--text-h)]">Role</label>
+              <label className="mb-1.5 block text-xs font-semibold text-[var(--text-h)]">
+                Role
+              </label>
               <select className={inputCls} {...register('role')}>
                 <option value="developer">Developer</option>
                 <option value="viewer">Viewer</option>
                 <option value="admin">Admin</option>
               </select>
-              {errors.role && <p className="mt-1 text-xs text-red-500">{errors.role.message}</p>}
+              {errors.role && <p className="mt-1.5 text-xs text-red-500">{errors.role.message}</p>}
             </div>
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="flex items-center gap-1.5 rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                className="flex items-center gap-2 rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 active:scale-95"
               >
                 <UserPlus size={14} />
                 Send Invite
