@@ -10,6 +10,11 @@ import { useAuthStore } from '@/stores/auth.store'
 import type { ReactNode } from 'react'
 
 // ─── Lazy pages ───────────────────────────────────────────────────────────────
+const PublicLayout = lazy(() => import('@/layouts/PublicLayout'))
+const LandingPage = lazy(() => import('@/pages/LandingPage'))
+const FeaturesPage = lazy(() => import('@/pages/FeaturesPage'))
+const ArchitecturePage = lazy(() => import('@/pages/ArchitecturePage'))
+const StackPage = lazy(() => import('@/pages/StackPage'))
 const Login = lazy(() => import('@/pages/Login'))
 const Register = lazy(() => import('@/pages/Register'))
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
@@ -50,7 +55,14 @@ export default function App() {
               <Route path="/settings" element={<Settings />} />
             </Route>
 
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            {/* Public marketing routes */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/architecture" element={<ArchitecturePage />} />
+              <Route path="/stack" element={<StackPage />} />
+            </Route>
+
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Suspense>
