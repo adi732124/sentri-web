@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "dist/types",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": true,
+    "noEmit": false
+  },
+  "include": [
+    "src/lib-entry.ts",
+    "src/components/**/*.ts",
+    "src/components/**/*.tsx",
+    "src/types/**/*.ts"
+  ]
+}
