@@ -16,7 +16,7 @@
 | Language | TypeScript | 6.x | ✅ Done |
 | Build Tool | Vite | 8.x | ✅ Done |
 | Styling | Tailwind CSS | 3.x | ❌ Pending |
-| Routing | React Router | 6.x | ❌ Pending |
+| Routing | React Router | 7.x | ✅ Done |
 | Global State | Zustand | 4.x | ❌ Pending |
 | Server State | React Query (TanStack) | 5.x | ❌ Pending |
 | HTTP Client | Axios | 1.x | ❌ Pending |
@@ -179,7 +179,7 @@ npm run preview          # Serve production build locally
 # Code quality
 npm run lint             # ESLint
 npm run format           # Prettier (planned)
-npm run type-check       # tsc --noEmit (planned)
+npm run type-check       # tsc --noEmit ✅ added
 
 # Testing
 npm run test             # Vitest unit + component tests (planned)
@@ -192,6 +192,11 @@ npm run test:coverage    # Vitest coverage report (planned)
 ## What Still Needs to Be Built
 
 ### Phase 2 — Styling & Routing Foundation
+- [x] Install **React Router v7** — `BrowserRouter`, `Routes`, `Route`, `NavLink`
+- [x] Lazy-load all pages with `React.lazy()` + `Suspense` (each page = separate JS chunk)
+- [x] `PageLoader` skeleton as the Suspense fallback (staggered pulse animation)
+- [x] Sticky top nav with active-link highlighting; catch-all `*` redirects to `/`
+- [x] Pages scaffolded: `Home`, `Dashboard`, `Incidents`, `Services`, `OnCall`, `Settings`
 - [ ] Install **Tailwind CSS** + configure dark mode (`class` strategy)
 - [ ] Extend `tailwind.config.ts` with Sentri design tokens (accent, text, bg colors)
 - [ ] Install **Prettier** and `.prettierrc` with Tailwind plugin for class sorting
@@ -259,19 +264,19 @@ npm run test:coverage    # Vitest coverage report (planned)
 - [ ] Target: 70% unit/component coverage, all critical E2E paths covered
 
 ### Phase 9 — CI/CD & Deploy
-- [ ] `.github/workflows/ci.yml` — triggers on every PR:
-  - `npm run lint`
-  - `npm run type-check`
-  - `npm run test`
-  - Chromatic visual regression
-- [ ] `.github/workflows/deploy.yml` — triggers on merge to `main`:
-  - `npm run build`
-  - Deploy `dist/` to Vercel / Netlify
-  - Post-deploy smoke test (ping production URL)
-- [ ] Configure Vercel / Netlify:
-  - Production branch: `main`
-  - Preview deploys on every PR with unique URL
-  - Environment variables: `VITE_API_URL`, `VITE_WS_URL`
+- [x] `.github/workflows/ci.yml` — triggers on every PR/push:
+  - Jobs: `lint-and-typecheck` → `build` + `test` + `storybook-build` (parallel)
+  - Uses `actions/setup-node@v4` with npm cache
+- [x] `.github/workflows/deploy.yml` — triggers on merge to `main`:
+  - Builds with `VITE_API_URL` / `VITE_WS_URL` secrets
+  - Deploys to Vercel via `amondnet/vercel-action@v25`
+  - Post-deploy smoke test (curl production URL)
+  - PR preview deploys with auto-comment of preview URL
+- [x] `.github/workflows/chromatic.yml` — triggers on PR + main push:
+  - Full-history checkout for accurate baseline comparison
+  - `onlyChanged: true` — only tests stories affected by changed files
+- [ ] Add `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `CHROMATIC_PROJECT_TOKEN` to GitHub Secrets
+- [ ] Configure Vercel project (production branch: `main`, env vars: `VITE_API_URL`, `VITE_WS_URL`)
 
 ### Phase 10 — Polish
 - [ ] Full dark mode via Tailwind `dark:` classes throughout all pages
@@ -351,16 +356,16 @@ Defined in `src/index.css` — will be migrated to `tailwind.config.ts` once Tai
 
 | Phase | Work | Status |
 |---|---|---|
-| 1 | Scaffold · base components · Storybook | ✅ Done |
-| 2 | Tailwind · Prettier · Husky · React Router · Layout | ❌ Not started |
-| 3 | Axios · Zod · React Hook Form · date-fns · env vars | ❌ Not started |
-| 4 | Zustand stores · React Query · Auth · API wiring | ❌ Not started |
-| 5 | Socket.io client · real-time incident/activity/toast | ❌ Not started |
-| 6 | Incident feed · Service dashboard · On-call · Workspace UI | ❌ Not started |
-| 7 | Storybook domain components (StatusBadge, IncidentCard…) | ❌ Not started |
-| 8 | Vitest · Testing Library · Playwright · Chromatic | ❌ Not started |
-| 9 | GitHub Actions CI/CD · Vercel deploy · preview URLs | ❌ Not started |
-| 10 | Dark mode · Responsive · ErrorBoundary · Accessibility | ❌ Not started |
+| 1 | Scaffold · base components (Button, Card, Badge, Input, Avatar) · Storybook | ✅ Done |
+| 2 | React Router · lazy loading · Suspense · PageLoader · page shells · CI/CD workflows | ✅ Done |
+| 3 | Tailwind · Prettier · Husky · path alias · Lucide · clsx · layout shell | ❌ Not started |
+| 4 | Axios · Zod · React Hook Form · date-fns · env vars | ❌ Not started |
+| 5 | Zustand stores · React Query · Auth · API wiring | ❌ Not started |
+| 6 | Socket.io client · real-time incident/activity/toast | ❌ Not started |
+| 7 | Incident feed · Service dashboard · On-call · Workspace UI | ❌ Not started |
+| 8 | Storybook domain components (StatusBadge, IncidentCard, MetricChart…) | ❌ Not started |
+| 9 | Vitest · Testing Library · Playwright · Chromatic | ❌ Not started |
+| 10 | Dark mode · Responsive · ErrorBoundary · Accessibility · Lighthouse | ❌ Not started |
 
 ---
 
