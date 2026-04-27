@@ -21,9 +21,18 @@ export interface MetricChartProps {
 }
 
 const variantConfig: Record<MetricChartVariant, { color: string; unit: string; gradId: string }> = {
-  latency: { color: '#aa3bff', unit: 'ms', gradId: 'grad-latency' },
-  uptime: { color: '#10b981', unit: '%', gradId: 'grad-uptime' },
-  'error-rate': { color: '#ef4444', unit: '%', gradId: 'grad-errors' },
+  latency: { color: 'var(--accent)', unit: 'ms', gradId: 'grad-latency' },
+  uptime: { color: 'var(--success)', unit: '%', gradId: 'grad-uptime' },
+  'error-rate': { color: 'var(--danger)', unit: '%', gradId: 'grad-errors' },
+}
+
+const tooltipStyle = {
+  background: 'var(--surface)',
+  border: '1px solid var(--border)',
+  borderRadius: 8,
+  fontSize: 11,
+  color: 'var(--text-h)',
+  boxShadow: 'var(--shadow-md)',
 }
 
 export function MetricChart({ data, variant = 'latency', height = 180, label }: MetricChartProps) {
@@ -32,7 +41,11 @@ export function MetricChart({ data, variant = 'latency', height = 180, label }: 
 
   return (
     <div>
-      {label && <div className="mb-2 text-xs font-medium text-[var(--text)]">{label}</div>}
+      {label && (
+        <div className="mb-2 text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+          {label}
+        </div>
+      )}
       <ResponsiveContainer width="100%" height={height}>
         {variant === 'latency' ? (
           <AreaChart data={chartData}>
@@ -43,21 +56,18 @@ export function MetricChart({ data, variant = 'latency', height = 180, label }: 
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="time" tick={{ fontSize: 10, fill: 'var(--text)' }} tickLine={false} />
+            <XAxis
+              dataKey="time"
+              tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
+              tickLine={false}
+            />
             <YAxis
-              tick={{ fontSize: 10, fill: 'var(--text)' }}
+              tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
               tickLine={false}
               axisLine={false}
               unit={unit}
             />
-            <Tooltip
-              contentStyle={{
-                background: 'var(--bg)',
-                border: '1px solid var(--border)',
-                borderRadius: 8,
-                fontSize: 11,
-              }}
-            />
+            <Tooltip contentStyle={tooltipStyle} />
             <Area
               type="monotone"
               dataKey="value"
@@ -69,21 +79,18 @@ export function MetricChart({ data, variant = 'latency', height = 180, label }: 
         ) : (
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="time" tick={{ fontSize: 10, fill: 'var(--text)' }} tickLine={false} />
+            <XAxis
+              dataKey="time"
+              tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
+              tickLine={false}
+            />
             <YAxis
-              tick={{ fontSize: 10, fill: 'var(--text)' }}
+              tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
               tickLine={false}
               axisLine={false}
               unit={unit}
             />
-            <Tooltip
-              contentStyle={{
-                background: 'var(--bg)',
-                border: '1px solid var(--border)',
-                borderRadius: 8,
-                fontSize: 11,
-              }}
-            />
+            <Tooltip contentStyle={tooltipStyle} />
             <Line type="monotone" dataKey="value" stroke={color} strokeWidth={2} dot={false} />
           </LineChart>
         )}

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import clsx from 'clsx'
 import { Plus, Search, AlertTriangle } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import type { Severity, IncidentStatus } from '@/types'
@@ -64,25 +63,36 @@ const mockIncidents: MockIncident[] = [
 
 const severityOrder: Severity[] = ['critical', 'high', 'medium', 'low']
 
-const severityConfig: Record<Severity, { badge: string; border: string; dot: string }> = {
-  critical: { badge: 'bg-red-500/10 text-red-500', border: 'border-l-red-500', dot: 'bg-red-500' },
-  high: {
-    badge: 'bg-orange-500/10 text-orange-500',
-    border: 'border-l-orange-500',
-    dot: 'bg-orange-500',
-  },
-  medium: {
-    badge: 'bg-yellow-500/10 text-yellow-500',
-    border: 'border-l-yellow-500',
-    dot: 'bg-yellow-500',
-  },
-  low: { badge: 'bg-blue-500/10 text-blue-400', border: 'border-l-blue-500', dot: 'bg-blue-500' },
+const severityColor: Record<Severity, string> = {
+  critical: 'var(--danger)',
+  high: 'var(--high)',
+  medium: 'var(--warning)',
+  low: 'var(--info)',
 }
 
-const statusConfig: Record<IncidentStatus, { badge: string; label: string }> = {
-  open: { badge: 'bg-red-500/10 text-red-500', label: 'Open' },
-  acknowledged: { badge: 'bg-yellow-500/10 text-yellow-500', label: 'Acknowledged' },
-  resolved: { badge: 'bg-emerald-500/10 text-emerald-500', label: 'Resolved' },
+const severityBg: Record<Severity, string> = {
+  critical: 'var(--danger-bg)',
+  high: 'var(--high-bg)',
+  medium: 'var(--warning-bg)',
+  low: 'var(--info-bg)',
+}
+
+const statusColor: Record<IncidentStatus, string> = {
+  open: 'var(--danger)',
+  acknowledged: 'var(--warning)',
+  resolved: 'var(--success)',
+}
+
+const statusBg: Record<IncidentStatus, string> = {
+  open: 'var(--danger-bg)',
+  acknowledged: 'var(--warning-bg)',
+  resolved: 'var(--success-bg)',
+}
+
+const statusLabel: Record<IncidentStatus, string> = {
+  open: 'Open',
+  acknowledged: 'Acknowledged',
+  resolved: 'Resolved',
 }
 
 type SeverityFilter = Severity | 'all'
@@ -112,15 +122,29 @@ export default function Incidents() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Page header */}
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+      {/* Header */}
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-[var(--text-h)]">Incidents</h1>
-          <p className="mt-0.5 text-sm text-[var(--text)]">
+          <h1
+            className="text-xl font-bold tracking-tight"
+            style={{ color: 'var(--text-h)', letterSpacing: '-0.02em' }}
+          >
+            Incidents
+          </h1>
+          <p className="mt-0.5 text-sm" style={{ color: 'var(--text-muted)' }}>
             {filtered.length} incident{filtered.length !== 1 ? 's' : ''} shown
           </p>
         </div>
-        <button className="flex items-center gap-2 rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 active:scale-95">
+        <button
+          className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all active:scale-[0.98]"
+          style={{ background: 'var(--accent)', boxShadow: '0 2px 8px rgba(124,58,237,0.3)' }}
+          onMouseEnter={(e) => {
+            ;(e.currentTarget as HTMLElement).style.background = 'var(--accent-hover)'
+          }}
+          onMouseLeave={(e) => {
+            ;(e.currentTarget as HTMLElement).style.background = 'var(--accent)'
+          }}
+        >
           <Plus size={15} strokeWidth={2.5} />
           New Incident
         </button>
@@ -128,50 +152,61 @@ export default function Incidents() {
 
       {/* Filters */}
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-        {/* Search */}
         <div className="relative flex-1 sm:min-w-48 sm:max-w-xs">
           <Search
             size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text)]"
+            className="absolute left-3 top-1/2 -translate-y-1/2"
+            style={{ color: 'var(--text-muted)' }}
           />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search incidents…"
-            className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] py-2.5 pl-9 pr-3 text-sm text-[var(--text-h)] placeholder-[var(--text)] outline-none transition-colors focus:border-[var(--accent)]"
+            className="w-full rounded-xl border py-2.5 pl-9 pr-3 text-sm outline-none transition-all focus:border-accent focus:ring-2 focus:ring-accent-bg"
+            style={{
+              borderColor: 'var(--border)',
+              background: 'var(--bg)',
+              color: 'var(--text-h)',
+            }}
           />
         </div>
 
-        {/* Severity pills */}
         <div className="flex flex-wrap gap-1.5">
           {(['all', 'critical', 'high', 'medium', 'low'] as const).map((s) => (
             <button
               key={s}
               onClick={() => setFilterSeverity(s)}
-              className={clsx(
-                'rounded-full px-3 py-1.5 text-xs font-semibold transition-colors',
+              className="rounded-full px-3 py-1.5 text-xs font-semibold transition-all"
+              style={
                 filterSeverity === s
-                  ? 'bg-[var(--accent)] text-white'
-                  : 'border border-[var(--border)] text-[var(--text)] hover:border-[var(--accent)] hover:text-[var(--text-h)]',
-              )}
+                  ? { background: 'var(--accent)', color: '#fff' }
+                  : {
+                      border: '1px solid var(--border)',
+                      color: 'var(--text)',
+                      background: 'transparent',
+                    }
+              }
             >
               {s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
             </button>
           ))}
         </div>
 
-        {/* Status pills */}
         <div className="flex flex-wrap gap-1.5">
           {(['all', 'open', 'acknowledged', 'resolved'] as const).map((s) => (
             <button
               key={s}
               onClick={() => setFilterStatus(s)}
-              className={clsx(
-                'rounded-full px-3 py-1.5 text-xs font-semibold transition-colors',
+              className="rounded-full px-3 py-1.5 text-xs font-semibold transition-all"
+              style={
                 filterStatus === s
-                  ? 'bg-[var(--accent)] text-white'
-                  : 'border border-[var(--border)] text-[var(--text)] hover:border-[var(--accent)] hover:text-[var(--text-h)]',
-              )}
+                  ? { background: 'var(--accent)', color: '#fff' }
+                  : {
+                      border: '1px solid var(--border)',
+                      color: 'var(--text)',
+                      background: 'transparent',
+                    }
+              }
             >
               {s === 'all' ? 'All status' : s.charAt(0).toUpperCase() + s.slice(1)}
             </button>
@@ -179,71 +214,96 @@ export default function Incidents() {
         </div>
       </div>
 
-      {/* Incident list */}
+      {/* List */}
       <div className="flex flex-col gap-2">
         {filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg)] py-16">
-            <AlertTriangle size={32} className="text-[var(--text)]" strokeWidth={1.5} />
-            <p className="text-sm text-[var(--text)]">No incidents match the current filters.</p>
+          <div
+            className="flex flex-col items-center justify-center gap-3 rounded-2xl border py-16"
+            style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
+          >
+            <AlertTriangle size={32} strokeWidth={1.5} style={{ color: 'var(--text-muted)' }} />
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              No incidents match the current filters.
+            </p>
           </div>
         )}
 
-        {filtered.map((inc) => {
-          const sev = severityConfig[inc.severity]
-          const st = statusConfig[inc.status]
-          return (
-            <div
-              key={inc.id}
-              className={clsx(
-                'flex flex-col gap-3 rounded-xl border border-l-4 border-[var(--border)] bg-[var(--bg)] px-4 py-3.5 transition-colors hover:bg-[var(--code-bg)] sm:flex-row sm:items-center sm:justify-between',
-                sev.border,
-              )}
-            >
-              {/* Left: title + meta */}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className={clsx('h-1.5 w-1.5 flex-shrink-0 rounded-full', sev.dot)} />
-                  <p className="truncate text-sm font-semibold text-[var(--text-h)]">{inc.title}</p>
-                </div>
-                <p className="mt-1 pl-3.5 text-xs text-[var(--text)]">
-                  {inc.service} ·{' '}
-                  {formatDistanceToNow(new Date(inc.createdAt), { addSuffix: true })} ·{' '}
-                  {inc.assignee}
+        {filtered.map((inc) => (
+          <div
+            key={inc.id}
+            className="flex flex-col gap-3 rounded-xl border bg-[var(--surface)] px-4 py-3.5 transition-colors hover:bg-[var(--code-bg)] sm:flex-row sm:items-center sm:justify-between"
+            style={{
+              borderColor: 'var(--border)',
+              borderLeftWidth: 3,
+              borderLeftColor: severityColor[inc.severity],
+            }}
+          >
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span
+                  className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                  style={{ background: severityColor[inc.severity] }}
+                />
+                <p className="truncate text-sm font-semibold" style={{ color: 'var(--text-h)' }}>
+                  {inc.title}
                 </p>
               </div>
-
-              {/* Right: badges + actions */}
-              <div className="flex flex-shrink-0 flex-wrap items-center gap-2">
-                <span
-                  className={clsx('rounded-full px-2.5 py-0.5 text-xs font-semibold', sev.badge)}
-                >
-                  {inc.severity}
-                </span>
-                <span
-                  className={clsx('rounded-full px-2.5 py-0.5 text-xs font-semibold', st.badge)}
-                >
-                  {st.label}
-                </span>
-                {inc.status === 'open' && (
-                  <button
-                    onClick={() => handleAcknowledge(inc.id)}
-                    className="rounded-lg border border-[var(--border)] px-3 py-1 text-xs font-semibold text-[var(--text)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                  >
-                    Acknowledge
-                  </button>
-                )}
-                {inc.status === 'acknowledged' && (
-                  <button
-                    onClick={() => handleResolve(inc.id)}
-                    className="rounded-lg border border-[var(--border)] px-3 py-1 text-xs font-semibold text-[var(--text)] transition-colors hover:border-emerald-500 hover:text-emerald-500"
-                  >
-                    Resolve
-                  </button>
-                )}
-              </div>
+              <p className="mt-1 pl-3.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+                {inc.service} · {formatDistanceToNow(new Date(inc.createdAt), { addSuffix: true })}{' '}
+                · {inc.assignee}
+              </p>
             </div>
-          )
-        })}
+
+            <div className="flex flex-shrink-0 flex-wrap items-center gap-2">
+              <span
+                className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                style={{ color: severityColor[inc.severity], background: severityBg[inc.severity] }}
+              >
+                {inc.severity}
+              </span>
+              <span
+                className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                style={{ color: statusColor[inc.status], background: statusBg[inc.status] }}
+              >
+                {statusLabel[inc.status]}
+              </span>
+              {inc.status === 'open' && (
+                <button
+                  onClick={() => handleAcknowledge(inc.id)}
+                  className="rounded-lg border px-3 py-1 text-xs font-semibold transition-colors"
+                  style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+                  onMouseEnter={(e) => {
+                    ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)'
+                    ;(e.currentTarget as HTMLElement).style.color = 'var(--accent)'
+                  }}
+                  onMouseLeave={(e) => {
+                    ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
+                    ;(e.currentTarget as HTMLElement).style.color = 'var(--text)'
+                  }}
+                >
+                  Acknowledge
+                </button>
+              )}
+              {inc.status === 'acknowledged' && (
+                <button
+                  onClick={() => handleResolve(inc.id)}
+                  className="rounded-lg border px-3 py-1 text-xs font-semibold transition-colors"
+                  style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+                  onMouseEnter={(e) => {
+                    ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--success)'
+                    ;(e.currentTarget as HTMLElement).style.color = 'var(--success)'
+                  }}
+                  onMouseLeave={(e) => {
+                    ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
+                    ;(e.currentTarget as HTMLElement).style.color = 'var(--text)'
+                  }}
+                >
+                  Resolve
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

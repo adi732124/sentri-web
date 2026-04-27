@@ -1,9 +1,20 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from 'react-router-dom'
+import clsx from 'clsx'
 import { registerSchema } from '@/schemas/auth.schema'
 import { useAuth } from '@/hooks/useAuth'
 import type { RegisterFormData } from '@/schemas/auth.schema'
+
+function inputCls(hasError: boolean) {
+  return clsx(
+    'w-full rounded-lg border px-3.5 py-2.5 text-sm outline-none transition-all',
+    'focus:border-accent focus:ring-2 focus:ring-accent-bg',
+    hasError
+      ? 'border-danger bg-danger-bg text-ui-heading'
+      : 'border-ui-border bg-ui-bg text-ui-heading',
+  )
+}
 
 function Field({
   label,
@@ -16,9 +27,15 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-sm font-medium text-[var(--text-h)]">{label}</label>
+      <label className="mb-1.5 block text-xs font-semibold" style={{ color: 'var(--text-h)' }}>
+        {label}
+      </label>
       {children}
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      {error && (
+        <p className="mt-1.5 text-xs font-medium" style={{ color: 'var(--danger)' }}>
+          {error}
+        </p>
+      )}
     </div>
   )
 }
@@ -31,9 +48,6 @@ export default function Register() {
     formState: { errors },
   } = useForm<RegisterFormData>({ resolver: zodResolver(registerSchema) })
 
-  const inputCls =
-    'w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text-h)] placeholder-[var(--text)] outline-none transition-colors focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-bg)]'
-
   const onSubmit = (data: RegisterFormData) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { confirmPassword: _cp, ...rest } = data
@@ -42,22 +56,37 @@ export default function Register() {
 
   return (
     <>
-      <h1 className="mb-1 text-xl font-semibold text-[var(--text-h)]">Create account</h1>
-      <p className="mb-6 text-sm text-[var(--text)]">Get started with Sentri</p>
+      <h1
+        className="mb-1 text-xl font-bold tracking-tight"
+        style={{ color: 'var(--text-h)', letterSpacing: '-0.02em' }}
+      >
+        Create account
+      </h1>
+      <p className="mb-7 text-sm" style={{ color: 'var(--text-muted)' }}>
+        Get started with Sentri for free
+      </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <Field label="Full name" error={errors.name?.message}>
-          <input className={inputCls} placeholder="Aditya Kumar" {...register('name')} />
+          <input
+            className={inputCls(!!errors.name)}
+            placeholder="Aditya Kumar"
+            {...register('name')}
+          />
         </Field>
 
         <Field label="Workspace name" error={errors.workspaceName?.message}>
-          <input className={inputCls} placeholder="My Team" {...register('workspaceName')} />
+          <input
+            className={inputCls(!!errors.workspaceName)}
+            placeholder="My Team"
+            {...register('workspaceName')}
+          />
         </Field>
 
         <Field label="Email" error={errors.email?.message}>
           <input
             type="email"
-            className={inputCls}
+            className={inputCls(!!errors.email)}
             placeholder="you@example.com"
             {...register('email')}
           />
@@ -66,7 +95,7 @@ export default function Register() {
         <Field label="Password" error={errors.password?.message}>
           <input
             type="password"
-            className={inputCls}
+            className={inputCls(!!errors.password)}
             placeholder="••••••••"
             {...register('password')}
           />
@@ -75,7 +104,7 @@ export default function Register() {
         <Field label="Confirm password" error={errors.confirmPassword?.message}>
           <input
             type="password"
-            className={inputCls}
+            className={inputCls(!!errors.confirmPassword)}
             placeholder="••••••••"
             {...register('confirmPassword')}
           />
@@ -84,15 +113,26 @@ export default function Register() {
         <button
           type="submit"
           disabled={isRegistering}
-          className="mt-2 w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="mt-1 w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          style={{ background: 'var(--accent)', boxShadow: '0 2px 8px rgba(124,58,237,0.3)' }}
+          onMouseEnter={(e) => {
+            ;(e.currentTarget as HTMLElement).style.background = 'var(--accent-hover)'
+          }}
+          onMouseLeave={(e) => {
+            ;(e.currentTarget as HTMLElement).style.background = 'var(--accent)'
+          }}
         >
           {isRegistering ? 'Creating account…' : 'Create account'}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-[var(--text)]">
+      <p className="mt-6 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
         Already have an account?{' '}
-        <Link to="/login" className="font-medium text-[var(--accent)] hover:underline">
+        <Link
+          to="/login"
+          className="font-semibold hover:underline"
+          style={{ color: 'var(--accent)' }}
+        >
           Sign in
         </Link>
       </p>

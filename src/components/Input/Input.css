@@ -2,40 +2,47 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  box-sizing: border-box;
 }
 
+/* ── Label ────────────────────────────────────────────────────────────────── */
 .input-field__label {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-h);
   line-height: 1;
+  letter-spacing: -0.01em;
 }
 
+/* ── Control wrapper ──────────────────────────────────────────────────────── */
 .input-field__control {
   position: relative;
   display: flex;
   align-items: center;
 }
 
+/* ── Input ────────────────────────────────────────────────────────────────── */
 .input-field__input {
   width: 100%;
-  padding: 9px 12px;
+  padding: 9px 13px;
   font-size: 14px;
   font-family: var(--sans);
   color: var(--text-h);
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  box-sizing: border-box;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
   line-height: 1.4;
 }
 
 .input-field__input::placeholder {
-  color: var(--text);
-  opacity: 0.6;
+  color: var(--text-muted);
+}
+
+.input-field__input:hover:not(:focus) {
+  border-color: var(--border-strong);
 }
 
 .input-field__input:focus {
@@ -43,37 +50,50 @@
   box-shadow: 0 0 0 3px var(--accent-bg);
 }
 
+/* ── Error state ──────────────────────────────────────────────────────────── */
 .input-field--error .input-field__input {
-  border-color: #ef4444;
+  border-color: var(--danger-border);
+  background: var(--danger-bg);
 }
 .input-field--error .input-field__input:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-bg);
 }
 
-/* Icon slots */
+/* ── Icon slots ───────────────────────────────────────────────────────────── */
 .input-field__icon {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text);
+  color: var(--text-muted);
   display: flex;
   align-items: center;
   pointer-events: none;
-  font-size: 15px;
+}
+.input-field__icon--left {
+  left: 11px;
+}
+.input-field__icon--right {
+  right: 11px;
+}
+.input-field__input--left-icon {
+  padding-left: 36px;
+}
+.input-field__input--right-icon {
+  padding-right: 36px;
 }
 
-.input-field__icon--left  { left: 10px; }
-.input-field__icon--right { right: 10px; }
-
-.input-field__input--left-icon  { padding-left: 34px; }
-.input-field__input--right-icon { padding-right: 34px; }
-
-/* Messages */
+/* ── Messages ─────────────────────────────────────────────────────────────── */
 .input-field__message {
-  margin: 0;
   font-size: 12px;
   line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
-
-.input-field__message--error { color: #ef4444; }
-.input-field__message--hint  { color: var(--text); opacity: 0.8; }
+.input-field__message--error {
+  color: var(--danger);
+}
+.input-field__message--hint {
+  color: var(--text-muted);
+}

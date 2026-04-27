@@ -54,47 +54,70 @@ function SortableRow({ item, isFirst }: { item: RotationItem; isFirst: boolean }
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        borderColor: 'var(--border)',
+        background: 'var(--surface)',
+      }}
       className={clsx(
-        'flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3.5 transition-shadow sm:items-center',
+        'flex items-start gap-3 rounded-2xl border px-4 py-3.5 transition-shadow sm:items-center',
         isDragging && 'opacity-50 shadow-sentri',
       )}
     >
-      {/* Drag handle */}
       <button
         {...attributes}
         {...listeners}
-        className="mt-0.5 cursor-grab rounded-md p-1 text-[var(--text)] hover:bg-[var(--code-bg)] hover:text-[var(--text-h)] active:cursor-grabbing sm:mt-0"
+        className="mt-0.5 cursor-grab rounded-md p-1 transition-colors active:cursor-grabbing sm:mt-0"
+        style={{ color: 'var(--text-muted)' }}
+        onMouseEnter={(e) => {
+          ;(e.currentTarget as HTMLElement).style.background = 'var(--code-bg)'
+          ;(e.currentTarget as HTMLElement).style.color = 'var(--text-h)'
+        }}
+        onMouseLeave={(e) => {
+          ;(e.currentTarget as HTMLElement).style.background = ''
+          ;(e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'
+        }}
       >
         <GripVertical size={14} />
       </button>
 
-      {/* Content */}
       <div className="flex min-w-0 flex-1 flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-        {/* Week label */}
         <div className="flex items-center gap-2">
           {isFirst && (
-            <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-500">
+            <span
+              className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
+              style={{ color: 'var(--success)', background: 'var(--success-bg)' }}
+            >
               Current
             </span>
           )}
-          <span className="text-sm font-semibold text-[var(--text-h)]">{item.week}</span>
+          <span className="text-sm font-semibold" style={{ color: 'var(--text-h)' }}>
+            {item.week}
+          </span>
         </div>
 
-        {/* Primary + Backup */}
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2.5">
             <Avatar name={item.primary.name} size="xs" status={item.primary.status} />
             <div>
-              <p className="text-xs font-medium text-[var(--text)]">Primary</p>
-              <p className="text-sm font-semibold text-[var(--text-h)]">{item.primary.name}</p>
+              <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                Primary
+              </p>
+              <p className="text-sm font-semibold" style={{ color: 'var(--text-h)' }}>
+                {item.primary.name}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2.5">
             <Avatar name={item.backup.name} size="xs" status={item.backup.status} />
             <div>
-              <p className="text-xs font-medium text-[var(--text)]">Backup</p>
-              <p className="text-sm font-semibold text-[var(--text-h)]">{item.backup.name}</p>
+              <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                Backup
+              </p>
+              <p className="text-sm font-semibold" style={{ color: 'var(--text-h)' }}>
+                {item.backup.name}
+              </p>
             </div>
           </div>
         </div>
@@ -121,27 +144,51 @@ export default function OnCall() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Page header */}
-      <div className="mb-5">
-        <h1 className="text-xl font-bold text-[var(--text-h)]">On-Call Schedule</h1>
-        <p className="mt-0.5 text-sm text-[var(--text)]">
+      <div className="mb-6">
+        <h1
+          className="text-xl font-bold tracking-tight"
+          style={{ color: 'var(--text-h)', letterSpacing: '-0.02em' }}
+        >
+          On-Call Schedule
+        </h1>
+        <p className="mt-0.5 text-sm" style={{ color: 'var(--text-muted)' }}>
           Rotation and escalation policy for the engineering team.
         </p>
       </div>
 
       {/* Currently on-call hero */}
-      <div className="mb-6 flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg)] px-5 py-5">
-        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10">
-          <Phone size={20} className="text-emerald-500" strokeWidth={2} />
+      <div
+        className="mb-6 flex items-center gap-4 rounded-2xl border px-5 py-5"
+        style={{ borderColor: 'var(--success-border)', background: 'var(--success-bg)' }}
+      >
+        <div
+          className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl"
+          style={{ background: 'var(--success-bg)', border: '1px solid var(--success-border)' }}
+        >
+          <Phone size={20} style={{ color: 'var(--success)' }} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text)]">
+          <p
+            className="text-xs font-semibold uppercase tracking-wider"
+            style={{ color: 'var(--success)' }}
+          >
             Currently On-Call
           </p>
-          <p className="mt-0.5 text-lg font-bold text-[var(--text-h)]">{current.primary.name}</p>
-          <p className="text-xs text-[var(--text)]">{current.week} · Primary</p>
+          <p className="mt-0.5 text-lg font-bold" style={{ color: 'var(--text-h)' }}>
+            {current.primary.name}
+          </p>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            {current.week} · Primary
+          </p>
         </div>
-        <span className="flex-shrink-0 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-500">
+        <span
+          className="flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold"
+          style={{
+            color: 'var(--success)',
+            background: 'var(--success-bg)',
+            border: '1px solid var(--success-border)',
+          }}
+        >
           Active
         </span>
       </div>
@@ -149,10 +196,15 @@ export default function OnCall() {
       {/* Rotation schedule */}
       <section className="mb-8">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-[var(--text)]">
+          <h2
+            className="text-xs font-semibold uppercase tracking-widest"
+            style={{ color: 'var(--text-muted)' }}
+          >
             Rotation Schedule
           </h2>
-          <span className="text-xs text-[var(--text)]">Drag to reorder</span>
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            Drag to reorder
+          </span>
         </div>
 
         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -168,33 +220,46 @@ export default function OnCall() {
 
       {/* Escalation policy */}
       <section>
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--text)]">
+        <h2
+          className="mb-3 text-xs font-semibold uppercase tracking-widest"
+          style={{ color: 'var(--text-muted)' }}
+        >
           Escalation Policy
         </h2>
         <div className="flex flex-col gap-2">
           {escalation.map((e) => (
             <div
               key={e.step}
-              className="flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3.5"
+              className="flex items-center gap-4 rounded-2xl border px-4 py-3.5"
+              style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
             >
-              {/* Step number */}
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[var(--accent-bg)] text-xs font-bold text-[var(--accent)]">
+              <div
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                style={{ background: 'var(--accent-bg)', color: 'var(--accent)' }}
+              >
                 {e.step}
               </div>
-
-              {/* Connector line (not last) */}
               <div className="flex-1">
-                <p className="text-sm font-semibold text-[var(--text-h)]">{e.label}</p>
-                <p className="text-xs text-[var(--text)]">{e.name}</p>
+                <p className="text-sm font-semibold" style={{ color: 'var(--text-h)' }}>
+                  {e.label}
+                </p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {e.name}
+                </p>
               </div>
-
               {e.timeout ? (
-                <span className="flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-1 text-xs text-[var(--text)]">
+                <span
+                  className="flex flex-shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs"
+                  style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
+                >
                   <Clock size={11} />
                   {e.timeout}
                 </span>
               ) : (
-                <span className="rounded-lg bg-[var(--accent-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--accent)]">
+                <span
+                  className="rounded-lg px-2.5 py-1 text-xs font-semibold"
+                  style={{ background: 'var(--accent-bg)', color: 'var(--accent)' }}
+                >
                   Final
                 </span>
               )}

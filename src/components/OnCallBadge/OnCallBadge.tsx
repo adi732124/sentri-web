@@ -8,33 +8,39 @@ export interface OnCallBadgeProps {
   className?: string
 }
 
-const config: Record<OnCallStatus, { cls: string; icon: typeof Phone; label: string }> = {
+const config: Record<
+  OnCallStatus,
+  { color: string; bg: string; border: string; icon: typeof Phone; label: string }
+> = {
   active: {
-    cls: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+    color: 'var(--success)',
+    bg: 'var(--success-bg)',
+    border: 'var(--success-border)',
     icon: Phone,
     label: 'On-Call',
   },
   'off-duty': {
-    cls: 'bg-[var(--code-bg)] text-[var(--text)] border-[var(--border)]',
+    color: 'var(--text)',
+    bg: 'var(--code-bg)',
+    border: 'var(--border)',
     icon: PhoneOff,
     label: 'Off-Duty',
   },
   escalated: {
-    cls: 'bg-red-500/10 text-red-500 border-red-500/20',
+    color: 'var(--danger)',
+    bg: 'var(--danger-bg)',
+    border: 'var(--danger-border)',
     icon: PhoneMissed,
     label: 'Escalated',
   },
 }
 
 export function OnCallBadge({ status, name, className }: OnCallBadgeProps) {
-  const { cls, icon: Icon, label } = config[status]
+  const { color, bg, border, icon: Icon, label } = config[status]
   return (
     <div
-      className={clsx(
-        'inline-flex items-center gap-2 rounded-full border px-3 py-1.5',
-        cls,
-        className,
-      )}
+      className={clsx('inline-flex items-center gap-2 rounded-full border px-3 py-1.5', className)}
+      style={{ color, background: bg, borderColor: border }}
     >
       <Icon size={12} />
       <span className="text-xs font-medium">{name}</span>

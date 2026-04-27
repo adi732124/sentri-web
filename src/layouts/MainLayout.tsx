@@ -9,6 +9,8 @@ import {
   LogOut,
   Moon,
   Sun,
+  ChevronDown,
+  Zap,
 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import clsx from 'clsx'
@@ -19,7 +21,7 @@ import { queryClient } from '@/lib/queryClient'
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/incidents', icon: AlertTriangle, label: 'Incidents' },
+  { to: '/incidents', icon: AlertTriangle, label: 'Incidents', badge: 2 },
   { to: '/services', icon: Server, label: 'Services' },
   { to: '/oncall', icon: Phone, label: 'On-Call' },
   { to: '/settings', icon: Settings, label: 'Settings' },
@@ -29,15 +31,12 @@ function useDarkMode() {
   const [dark, setDark] = useState(() => {
     const stored = localStorage.getItem('sentri_theme')
     if (stored) return stored === 'dark'
-    // Default to dark for a monitoring app
     return true
   })
-
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
     localStorage.setItem('sentri_theme', dark ? 'dark' : 'light')
   }, [dark])
-
   return { dark, toggle: () => setDark((d) => !d) }
 }
 
@@ -68,114 +67,243 @@ export function MainLayout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--bg)] text-[var(--text)]">
-      {/* ── Sidebar — desktop only ─────────────────────────────────────────── */}
-      <aside className="hidden w-56 flex-shrink-0 flex-col border-r border-[var(--border)] bg-[var(--bg)] md:flex">
+    <div
+      className="flex h-screen overflow-hidden"
+      style={{ background: 'var(--bg)', color: 'var(--text)' }}
+    >
+      {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
+      <aside
+        className="hidden w-[240px] flex-shrink-0 flex-col md:flex"
+        style={{ background: 'var(--surface)', borderRight: '1px solid var(--border)' }}
+      >
         {/* Brand */}
-        <div className="flex h-14 items-center gap-2.5 border-b border-[var(--border)] px-5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--accent)]">
-            <span className="text-xs font-bold text-white">S</span>
+        <div
+          className="flex h-[57px] flex-shrink-0 items-center gap-3 px-5"
+          style={{ borderBottom: '1px solid var(--border)' }}
+        >
+          <div
+            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
+            style={{
+              background:
+                'linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 70%, #3b82f6) 100%)',
+              boxShadow: '0 2px 8px rgba(124,58,237,0.35)',
+            }}
+          >
+            <Zap size={15} className="text-white" strokeWidth={2.5} />
           </div>
-          <span className="text-sm font-bold tracking-tight text-[var(--text-h)]">Sentri</span>
+          <div>
+            <span
+              className="text-[15px] font-bold tracking-tight"
+              style={{ color: 'var(--text-h)', letterSpacing: '-0.02em' }}
+            >
+              Sentri
+            </span>
+            <span
+              className="ml-1.5 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+              style={{ background: 'var(--accent-bg)', color: 'var(--accent)' }}
+            >
+              Pro
+            </span>
+          </div>
         </div>
 
-        {/* Nav links */}
-        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-2.5">
-          {navItems.map(({ to, icon: Icon, label }) => (
+        {/* Nav */}
+        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-3">
+          <p
+            className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            Menu
+          </p>
+          {navItems.map(({ to, icon: Icon, label, badge }) => (
             <NavLink
               key={to}
               to={to}
               className={({ isActive }) =>
                 clsx(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150',
-                  isActive
-                    ? 'bg-[var(--accent-bg)] text-[var(--accent)]'
-                    : 'text-[var(--text)] hover:bg-[var(--code-bg)] hover:text-[var(--text-h)]',
+                  'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150',
+                  isActive ? 'nav-active' : 'nav-default',
                 )
+              }
+              style={({ isActive }) =>
+                isActive
+                  ? {
+                      background: 'var(--accent-bg)',
+                      color: 'var(--accent)',
+                    }
+                  : {
+                      color: 'var(--text)',
+                    }
               }
             >
               {({ isActive }) => (
                 <>
-                  <Icon size={16} strokeWidth={isActive ? 2.5 : 1.75} />
-                  <span>{label}</span>
+                  <Icon
+                    size={16}
+                    strokeWidth={isActive ? 2.5 : 1.75}
+                    style={{ flexShrink: 0, transition: 'color 150ms' }}
+                  />
+                  <span className="flex-1">{label}</span>
+                  {badge && !isActive && (
+                    <span
+                      className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold"
+                      style={{ background: 'var(--danger)', color: '#fff' }}
+                    >
+                      {badge}
+                    </span>
+                  )}
+                  {isActive && (
+                    <span
+                      className="absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full"
+                      style={{ background: 'var(--accent)' }}
+                    />
+                  )}
                 </>
               )}
             </NavLink>
           ))}
         </nav>
 
-        {/* Dark mode toggle */}
-        <div className="border-t border-[var(--border)] p-2.5">
+        {/* Bottom section */}
+        <div
+          className="flex-shrink-0 space-y-1 p-3"
+          style={{ borderTop: '1px solid var(--border)' }}
+        >
+          {/* Theme toggle */}
           <button
             onClick={toggle}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[var(--text)] transition-colors hover:bg-[var(--code-bg)] hover:text-[var(--text-h)]"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150"
+            style={{ color: 'var(--text)' }}
+            onMouseEnter={(e) => {
+              ;(e.currentTarget as HTMLElement).style.background = 'var(--code-bg)'
+              ;(e.currentTarget as HTMLElement).style.color = 'var(--text-h)'
+            }}
+            onMouseLeave={(e) => {
+              ;(e.currentTarget as HTMLElement).style.background = ''
+              ;(e.currentTarget as HTMLElement).style.color = 'var(--text)'
+            }}
           >
-            {dark ? <Sun size={15} /> : <Moon size={15} />}
-            {dark ? 'Light mode' : 'Dark mode'}
+            {dark ? <Sun size={15} strokeWidth={1.75} /> : <Moon size={15} strokeWidth={1.75} />}
+            <span>{dark ? 'Light mode' : 'Dark mode'}</span>
           </button>
         </div>
       </aside>
 
-      {/* ── Main area ──────────────────────────────────────────────────────── */}
+      {/* ── Main area ─────────────────────────────────────────────────────────── */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Topbar */}
-        <header className="flex h-14 flex-shrink-0 items-center border-b border-[var(--border)] bg-[var(--bg)] px-4">
-          {/* Brand — mobile only; flex-1 pushes actions to the right */}
-          <div className="flex flex-1 items-center gap-2 md:hidden">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--accent)]">
-              <span className="text-xs font-bold text-white">S</span>
+        <header
+          className="flex h-[57px] flex-shrink-0 items-center gap-3 px-5"
+          style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}
+        >
+          {/* Mobile brand */}
+          <div className="flex flex-1 items-center gap-2.5 md:hidden">
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-lg"
+              style={{
+                background:
+                  'linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #3b82f6))',
+              }}
+            >
+              <Zap size={15} className="text-white" strokeWidth={2.5} />
             </div>
-            <span className="text-sm font-bold tracking-tight text-[var(--text-h)]">Sentri</span>
+            <span className="text-[15px] font-bold" style={{ color: 'var(--text-h)' }}>
+              Sentri
+            </span>
           </div>
 
-          {/* Actions — always on the RIGHT (ml-auto on desktop since brand is gone) */}
-          <div className="ml-auto flex items-center gap-1 md:ml-0">
-            {/* Dark mode — mobile only */}
+          <div className="ml-auto flex items-center gap-1">
+            {/* Mobile theme */}
             <button
               onClick={toggle}
-              aria-label="Toggle theme"
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text)] transition-colors hover:bg-[var(--code-bg)] hover:text-[var(--text-h)] md:hidden"
+              className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:hidden"
+              style={{ color: 'var(--text)' }}
             >
-              {dark ? <Sun size={16} /> : <Moon size={16} />}
+              {dark ? <Sun size={16} strokeWidth={1.75} /> : <Moon size={16} strokeWidth={1.75} />}
             </button>
 
             {/* Notifications */}
             <button
-              aria-label="Notifications"
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text)] transition-colors hover:bg-[var(--code-bg)] hover:text-[var(--text-h)]"
+              className="relative flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-150"
+              style={{ color: 'var(--text)' }}
+              onMouseEnter={(e) => {
+                ;(e.currentTarget as HTMLElement).style.background = 'var(--code-bg)'
+              }}
+              onMouseLeave={(e) => {
+                ;(e.currentTarget as HTMLElement).style.background = ''
+              }}
             >
-              <Bell size={16} />
+              <Bell size={16} strokeWidth={1.75} />
+              <span
+                className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full"
+                style={{ background: 'var(--danger)', boxShadow: '0 0 0 2px var(--surface)' }}
+              />
             </button>
 
             {/* User menu */}
             <div ref={userMenuRef} className="relative ml-1">
               <button
                 onClick={() => setUserMenuOpen((o) => !o)}
-                className={clsx(
-                  'flex h-9 items-center gap-2 rounded-lg px-2 transition-colors hover:bg-[var(--code-bg)]',
-                  userMenuOpen && 'bg-[var(--code-bg)]',
-                )}
+                className="flex h-9 items-center gap-2 rounded-lg px-2 transition-all duration-150"
+                style={userMenuOpen ? { background: 'var(--code-bg)' } : {}}
+                onMouseEnter={(e) => {
+                  if (!userMenuOpen)
+                    (e.currentTarget as HTMLElement).style.background = 'var(--code-bg)'
+                }}
+                onMouseLeave={(e) => {
+                  if (!userMenuOpen) (e.currentTarget as HTMLElement).style.background = ''
+                }}
               >
                 <Avatar name={user?.name ?? 'U'} size="xs" />
-                <span className="hidden max-w-[110px] truncate text-sm font-medium text-[var(--text-h)] sm:block">
+                <span
+                  className="hidden max-w-[120px] truncate text-sm font-medium sm:block"
+                  style={{ color: 'var(--text-h)' }}
+                >
                   {user?.name ?? 'User'}
                 </span>
+                <ChevronDown
+                  size={14}
+                  className="hidden transition-transform duration-150 sm:block"
+                  style={{
+                    color: 'var(--text-muted)',
+                    transform: userMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  }}
+                />
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 top-full z-50 mt-1.5 w-52 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg)] shadow-sentri">
-                  <div className="border-b border-[var(--border)] px-4 py-3">
-                    <p className="truncate text-sm font-semibold text-[var(--text-h)]">
+                <div
+                  className="absolute right-0 top-full z-50 mt-1.5 w-56 overflow-hidden rounded-xl"
+                  style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    boxShadow: 'var(--shadow-lg)',
+                  }}
+                >
+                  <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+                    <p
+                      className="truncate text-sm font-semibold"
+                      style={{ color: 'var(--text-h)' }}
+                    >
                       {user?.name ?? 'User'}
                     </p>
-                    <p className="truncate text-xs text-[var(--text)]">
+                    <p className="mt-0.5 truncate text-xs" style={{ color: 'var(--text-muted)' }}>
                       {user?.email ?? 'user@sentri.dev'}
                     </p>
                   </div>
-                  <div className="p-1">
+                  <div className="p-1.5">
                     <button
                       onClick={handleLogout}
-                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-[var(--text)] transition-colors hover:bg-red-500/10 hover:text-red-500"
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-colors"
+                      style={{ color: 'var(--text)' }}
+                      onMouseEnter={(e) => {
+                        ;(e.currentTarget as HTMLElement).style.background = 'var(--danger-bg)'
+                        ;(e.currentTarget as HTMLElement).style.color = 'var(--danger)'
+                      }}
+                      onMouseLeave={(e) => {
+                        ;(e.currentTarget as HTMLElement).style.background = ''
+                        ;(e.currentTarget as HTMLElement).style.color = 'var(--text)'
+                      }}
                     >
                       <LogOut size={14} />
                       Sign out
@@ -193,8 +321,11 @@ export function MainLayout() {
         </main>
       </div>
 
-      {/* ── Bottom tab bar — mobile only ──────────────────────────────────── */}
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--border)] bg-[var(--bg)] md:hidden">
+      {/* ── Mobile bottom nav ────────────────────────────────────────────────── */}
+      <nav
+        className="fixed inset-x-0 bottom-0 z-50 md:hidden"
+        style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)' }}
+      >
         <div className="flex h-16 items-stretch px-1">
           {navItems.map(({ to, icon: Icon, label }) => (
             <NavLink
@@ -204,26 +335,19 @@ export function MainLayout() {
             >
               {({ isActive }) => (
                 <>
-                  {/* Pill background */}
                   <span
-                    className={clsx(
-                      'absolute inset-x-1 inset-y-1.5 rounded-xl transition-all duration-200',
-                      isActive ? 'bg-[var(--accent-bg)]' : 'bg-transparent',
-                    )}
+                    className="absolute inset-x-1 inset-y-1.5 rounded-xl transition-all duration-200"
+                    style={isActive ? { background: 'var(--accent-bg)' } : {}}
                   />
                   <Icon
                     size={20}
                     strokeWidth={isActive ? 2.5 : 1.75}
-                    className={clsx(
-                      'relative z-10 transition-colors',
-                      isActive ? 'text-[var(--accent)]' : 'text-[var(--text)]',
-                    )}
+                    className="relative z-10 transition-colors"
+                    style={{ color: isActive ? 'var(--accent)' : 'var(--text)' }}
                   />
                   <span
-                    className={clsx(
-                      'relative z-10 mt-1 text-[10px] font-semibold leading-none transition-colors',
-                      isActive ? 'text-[var(--accent)]' : 'text-[var(--text)]',
-                    )}
+                    className="relative z-10 mt-1 text-[10px] font-semibold leading-none transition-colors"
+                    style={{ color: isActive ? 'var(--accent)' : 'var(--text)' }}
                   >
                     {label}
                   </span>

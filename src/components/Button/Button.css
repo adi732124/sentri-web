@@ -2,18 +2,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius);
   font-family: var(--sans);
   font-weight: 500;
+  font-size: 14px;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s, box-shadow 0.15s;
+  transition:
+    background var(--transition),
+    color var(--transition),
+    border-color var(--transition),
+    box-shadow var(--transition),
+    opacity var(--transition),
+    transform var(--transition-fast);
   white-space: nowrap;
   text-decoration: none;
   position: relative;
   line-height: 1;
-  box-sizing: border-box;
+  letter-spacing: -0.01em;
+  user-select: none;
 }
 
 .btn:focus-visible {
@@ -22,75 +30,114 @@
 }
 
 .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-/* Sizes */
-.btn--sm { padding: 6px 12px; font-size: 13px; }
-.btn--md { padding: 9px 16px; font-size: 14px; }
-.btn--lg { padding: 12px 22px; font-size: 16px; }
+.btn:not(:disabled):active {
+  transform: translateY(1px);
+}
 
-.btn--full { width: 100%; }
+/* ── Sizes ────────────────────────────────────────────────────────────────── */
+.btn--sm {
+  padding: 5px 11px;
+  font-size: 12px;
+  border-radius: 6px;
+  gap: 5px;
+}
+.btn--md {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+.btn--lg {
+  padding: 10px 20px;
+  font-size: 15px;
+  gap: 7px;
+}
+.btn--full {
+  width: 100%;
+}
 
-/* Primary */
+/* ── Primary ──────────────────────────────────────────────────────────────── */
 .btn--primary {
   background: var(--accent);
   color: #fff;
+  border-color: var(--accent);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 .btn--primary:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 82%, #000);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  box-shadow:
+    0 4px 14px rgba(124, 58, 237, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Secondary */
+/* ── Secondary ────────────────────────────────────────────────────────────── */
 .btn--secondary {
   background: var(--accent-bg);
   color: var(--accent);
   border-color: var(--accent-border);
 }
 .btn--secondary:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent-bg) 60%, var(--accent));
+  background: color-mix(in srgb, var(--accent-bg) 60%, var(--accent) 40%);
+  border-color: color-mix(in srgb, var(--accent-border) 50%, var(--accent) 50%);
 }
 
-/* Ghost */
+/* ── Ghost ────────────────────────────────────────────────────────────────── */
 .btn--ghost {
   background: transparent;
-  color: var(--text-h);
+  color: var(--text);
   border-color: var(--border);
 }
 .btn--ghost:hover:not(:disabled) {
   background: var(--code-bg);
+  color: var(--text-h);
+  border-color: var(--border-strong);
 }
 
-/* Danger */
+/* ── Danger ───────────────────────────────────────────────────────────────── */
 .btn--danger {
-  background: #ef4444;
-  color: #fff;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-color: var(--danger-border);
 }
 .btn--danger:hover:not(:disabled) {
-  background: #dc2626;
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
 }
 
-/* Icon slots */
+/* ── Icon slots ───────────────────────────────────────────────────────────── */
 .btn__icon {
   display: inline-flex;
   align-items: center;
-  font-size: 1.1em;
   flex-shrink: 0;
+  opacity: 0.9;
 }
 
-/* Loading spinner */
+/* ── Spinner ──────────────────────────────────────────────────────────────── */
 .btn__spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid currentColor;
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid currentColor;
   border-top-color: transparent;
   border-radius: 50%;
-  animation: btn-spin 0.6s linear infinite;
+  animation: btn-spin 0.55s linear infinite;
   flex-shrink: 0;
+  opacity: 0.8;
+}
+.btn--lg .btn__spinner {
+  width: 15px;
+  height: 15px;
 }
 
 @keyframes btn-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }

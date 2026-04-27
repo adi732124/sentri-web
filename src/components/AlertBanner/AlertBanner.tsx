@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { X, AlertTriangle, Info, AlertCircle } from 'lucide-react'
-import clsx from 'clsx'
 import type { ReactNode } from 'react'
 
 export type AlertVariant = 'info' | 'warning' | 'danger'
@@ -13,10 +12,23 @@ export interface AlertBannerProps {
   onDismiss?: () => void
 }
 
-const config: Record<AlertVariant, { cls: string; icon: typeof Info }> = {
-  info: { cls: 'bg-blue-500/10 border-blue-500/20 text-blue-600', icon: Info },
-  warning: { cls: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-700', icon: AlertTriangle },
-  danger: { cls: 'bg-red-500/10 border-red-500/20 text-red-600', icon: AlertCircle },
+const config: Record<
+  AlertVariant,
+  { color: string; bg: string; border: string; icon: typeof Info }
+> = {
+  info: { color: 'var(--info)', bg: 'var(--info-bg)', border: 'var(--info-border)', icon: Info },
+  warning: {
+    color: 'var(--warning)',
+    bg: 'var(--warning-bg)',
+    border: 'var(--warning-border)',
+    icon: AlertTriangle,
+  },
+  danger: {
+    color: 'var(--danger)',
+    bg: 'var(--danger-bg)',
+    border: 'var(--danger-border)',
+    icon: AlertCircle,
+  },
 }
 
 export function AlertBanner({
@@ -27,7 +39,7 @@ export function AlertBanner({
   onDismiss,
 }: AlertBannerProps) {
   const [dismissed, setDismissed] = useState(false)
-  const { cls, icon: Icon } = config[variant]
+  const { color, bg, border, icon: Icon } = config[variant]
 
   if (dismissed) return null
 
@@ -39,7 +51,8 @@ export function AlertBanner({
   return (
     <div
       role="alert"
-      className={clsx('flex items-start gap-3 rounded-xl border px-4 py-3 text-sm', cls)}
+      className="flex items-start gap-3 rounded-xl border px-4 py-3 text-sm"
+      style={{ color, background: bg, borderColor: border }}
     >
       <Icon size={16} className="mt-0.5 flex-shrink-0" />
       <div className="flex-1">

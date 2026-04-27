@@ -85,39 +85,67 @@ const services: ServiceRow[] = [
   },
 ]
 
-const statusConfig: Record<ServiceStatus, { dot: string; badge: string; label: string }> = {
+const statusConfig: Record<
+  ServiceStatus,
+  { dotColor: string; badgeColor: string; badgeBg: string; label: string; pulse: boolean }
+> = {
   operational: {
-    dot: 'bg-emerald-500',
-    badge: 'bg-emerald-500/10 text-emerald-500',
+    dotColor: 'var(--success)',
+    badgeColor: 'var(--success)',
+    badgeBg: 'var(--success-bg)',
     label: 'Operational',
+    pulse: false,
   },
-  degraded: { dot: 'bg-yellow-500', badge: 'bg-yellow-500/10 text-yellow-500', label: 'Degraded' },
-  down: { dot: 'bg-red-500', badge: 'bg-red-500/10 text-red-500', label: 'Down' },
-  maintenance: { dot: 'bg-blue-500', badge: 'bg-blue-500/10 text-blue-400', label: 'Maintenance' },
+  degraded: {
+    dotColor: 'var(--warning)',
+    badgeColor: 'var(--warning)',
+    badgeBg: 'var(--warning-bg)',
+    label: 'Degraded',
+    pulse: true,
+  },
+  down: {
+    dotColor: 'var(--danger)',
+    badgeColor: 'var(--danger)',
+    badgeBg: 'var(--danger-bg)',
+    label: 'Down',
+    pulse: true,
+  },
+  maintenance: {
+    dotColor: 'var(--info)',
+    badgeColor: 'var(--info)',
+    badgeBg: 'var(--info-bg)',
+    label: 'Maintenance',
+    pulse: false,
+  },
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="text-center">
-      <p className="text-xs text-[var(--text)]">{label}</p>
-      <p className="mt-0.5 text-sm font-bold text-[var(--text-h)]">{value}</p>
+      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        {label}
+      </p>
+      <p className="mt-0.5 text-sm font-bold" style={{ color: 'var(--text-h)' }}>
+        {value}
+      </p>
     </div>
   )
 }
 
 function StatusDot({ status }: { status: ServiceStatus }) {
-  const { dot } = statusConfig[status]
+  const { dotColor, pulse } = statusConfig[status]
   return (
     <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
-      {status === 'operational' && (
+      {pulse && (
         <span
-          className={clsx(
-            'absolute inline-flex h-full w-full animate-ping rounded-full opacity-60',
-            dot,
-          )}
+          className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"
+          style={{ background: dotColor }}
         />
       )}
-      <span className={clsx('relative inline-flex h-2.5 w-2.5 rounded-full', dot)} />
+      <span
+        className="relative inline-flex h-2.5 w-2.5 rounded-full"
+        style={{ background: dotColor }}
+      />
     </span>
   )
 }
@@ -128,26 +156,29 @@ export default function Services() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Page header */}
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-[var(--text-h)]">Services</h1>
-          <p className="mt-0.5 text-sm text-[var(--text)]">
+          <h1
+            className="text-xl font-bold tracking-tight"
+            style={{ color: 'var(--text-h)', letterSpacing: '-0.02em' }}
+          >
+            Services
+          </h1>
+          <p className="mt-0.5 text-sm" style={{ color: 'var(--text-muted)' }}>
             Health and latency for all registered services.
           </p>
         </div>
-        {/* Time range selector */}
-        <div className="flex gap-1 rounded-xl border border-[var(--border)] p-1">
+        <div className="flex gap-1 rounded-xl border p-1" style={{ borderColor: 'var(--border)' }}>
           {(['1h', '24h', '7d', '30d'] as TimeRange[]).map((r) => (
             <button
               key={r}
               onClick={() => setRange(r)}
-              className={clsx(
-                'rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors',
+              className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
+              style={
                 range === r
-                  ? 'bg-[var(--accent)] text-white'
-                  : 'text-[var(--text)] hover:text-[var(--text-h)]',
-              )}
+                  ? { background: 'var(--accent)', color: '#fff' }
+                  : { color: 'var(--text)' }
+              }
             >
               {r}
             </button>
@@ -155,7 +186,6 @@ export default function Services() {
         </div>
       </div>
 
-      {/* Service cards */}
       <div className="flex flex-col gap-3">
         {services.map((svc) => {
           const cfg = statusConfig[svc.status]
@@ -164,21 +194,31 @@ export default function Services() {
           return (
             <div
               key={svc.id}
-              className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg)]"
+              className="overflow-hidden rounded-2xl border"
+              style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
             >
-              {/* Collapsed header row */}
               <button
                 onClick={() => setExpanded(isExpanded ? null : svc.id)}
-                className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-[var(--code-bg)] sm:px-5"
+                className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors sm:px-5"
+                style={{ background: 'transparent' }}
+                onMouseEnter={(e) => {
+                  ;(e.currentTarget as HTMLElement).style.background = 'var(--code-bg)'
+                }}
+                onMouseLeave={(e) => {
+                  ;(e.currentTarget as HTMLElement).style.background = 'transparent'
+                }}
               >
                 <StatusDot status={svc.status} />
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-[var(--text-h)]">{svc.name}</p>
-                  <p className="text-xs text-[var(--text)]">{svc.url}</p>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--text-h)' }}>
+                    {svc.name}
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    {svc.url}
+                  </p>
                 </div>
 
-                {/* Metrics — hidden on mobile */}
                 <div className="hidden items-center gap-5 md:flex lg:gap-7">
                   <Metric label="Uptime" value={`${svc.uptime}%`} />
                   <Metric label="p50" value={svc.p50} />
@@ -188,10 +228,8 @@ export default function Services() {
                 </div>
 
                 <span
-                  className={clsx(
-                    'flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold',
-                    cfg.badge,
-                  )}
+                  className="flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
+                  style={{ color: cfg.badgeColor, background: cfg.badgeBg }}
                 >
                   {cfg.label}
                 </span>
@@ -199,17 +237,22 @@ export default function Services() {
                 <ChevronDown
                   size={16}
                   className={clsx(
-                    'flex-shrink-0 text-[var(--text)] transition-transform duration-200',
+                    'flex-shrink-0 transition-transform duration-200',
                     isExpanded && 'rotate-180',
                   )}
+                  style={{ color: 'var(--text-muted)' }}
                 />
               </button>
 
-              {/* Expanded panel */}
               {isExpanded && (
-                <div className="border-t border-[var(--border)] px-4 pb-5 pt-4 sm:px-5">
-                  {/* Mobile metrics grid */}
-                  <div className="mb-4 grid grid-cols-3 gap-3 rounded-xl border border-[var(--border)] p-3 md:hidden">
+                <div
+                  className="border-t px-4 pb-5 pt-4 sm:px-5"
+                  style={{ borderColor: 'var(--border)' }}
+                >
+                  <div
+                    className="mb-4 grid grid-cols-3 gap-3 rounded-xl border p-3 md:hidden"
+                    style={{ borderColor: 'var(--border)' }}
+                  >
                     <Metric label="Uptime" value={`${svc.uptime}%`} />
                     <Metric label="p50" value={svc.p50} />
                     <Metric label="p95" value={svc.p95} />
@@ -217,7 +260,10 @@ export default function Services() {
                     <Metric label="Err rate" value={svc.errorRate} />
                   </div>
 
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--text)]">
+                  <p
+                    className="mb-3 text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: 'var(--text-muted)' }}
+                  >
                     Latency over {range}
                   </p>
                   <ResponsiveContainer width="100%" height={140}>
@@ -234,22 +280,23 @@ export default function Services() {
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis
                         dataKey="time"
-                        tick={{ fontSize: 10, fill: 'var(--text)' }}
+                        tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                         tickLine={false}
                       />
                       <YAxis
-                        tick={{ fontSize: 10, fill: 'var(--text)' }}
+                        tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                         tickLine={false}
                         axisLine={false}
                         unit="ms"
                       />
                       <Tooltip
                         contentStyle={{
-                          background: 'var(--bg)',
+                          background: 'var(--surface)',
                           border: '1px solid var(--border)',
                           borderRadius: 10,
                           fontSize: 11,
                           color: 'var(--text-h)',
+                          boxShadow: 'var(--shadow-md)',
                         }}
                       />
                       <Area

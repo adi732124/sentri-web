@@ -8,8 +8,15 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { formatDistanceToNow } from 'date-fns'
-import clsx from 'clsx'
-import { AlertTriangle, Activity, Server, Users, ArrowUpRight } from 'lucide-react'
+import {
+  AlertTriangle,
+  Activity,
+  Server,
+  Users,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+} from 'lucide-react'
 import { Avatar } from '@/components/Avatar/Avatar'
 import type { Severity, IncidentStatus, ServiceStatus, AvatarStatus } from '@/types'
 
@@ -85,28 +92,49 @@ const mockTeam = [
   { name: 'John Davis', role: 'DevOps', status: 'away' as AvatarStatus },
 ]
 
-const severityColor: Record<Severity, string> = {
-  critical: 'bg-red-500/10 text-red-500',
-  high: 'bg-orange-500/10 text-orange-500',
-  medium: 'bg-yellow-500/10 text-yellow-500',
-  low: 'bg-blue-500/10 text-blue-400',
+const severityConfig: Record<Severity, { bg: string; color: string; border: string }> = {
+  critical: { bg: 'var(--danger-bg)', color: 'var(--danger)', border: 'var(--danger-border)' },
+  high: { bg: 'rgba(234,88,12,0.08)', color: '#ea580c', border: 'rgba(234,88,12,0.2)' },
+  medium: { bg: 'var(--warning-bg)', color: 'var(--warning)', border: 'var(--warning-border)' },
+  low: { bg: 'var(--info-bg)', color: 'var(--info)', border: 'var(--info-border)' },
 }
 
-const incStatusColor: Record<IncidentStatus, string> = {
-  open: 'bg-red-500/10 text-red-500',
-  acknowledged: 'bg-yellow-500/10 text-yellow-500',
-  resolved: 'bg-emerald-500/10 text-emerald-500',
+const incidentStatusConfig: Record<IncidentStatus, { bg: string; color: string }> = {
+  open: { bg: 'var(--danger-bg)', color: 'var(--danger)' },
+  acknowledged: { bg: 'var(--warning-bg)', color: 'var(--warning)' },
+  resolved: { bg: 'var(--success-bg)', color: 'var(--success)' },
 }
 
-const svcStatusConfig: Record<ServiceStatus, { dot: string; label: string; badge: string }> = {
+const serviceStatusConfig: Record<
+  ServiceStatus,
+  { dot: string; label: string; bg: string; color: string }
+> = {
   operational: {
-    dot: 'bg-emerald-500',
+    dot: '#22c55e',
     label: 'Operational',
-    badge: 'bg-emerald-500/10 text-emerald-500',
+    bg: 'var(--success-bg)',
+    color: 'var(--success)',
   },
-  degraded: { dot: 'bg-yellow-500', label: 'Degraded', badge: 'bg-yellow-500/10 text-yellow-500' },
-  down: { dot: 'bg-red-500', label: 'Down', badge: 'bg-red-500/10 text-red-500' },
-  maintenance: { dot: 'bg-blue-500', label: 'Maintenance', badge: 'bg-blue-500/10 text-blue-400' },
+  degraded: {
+    dot: 'var(--warning)',
+    label: 'Degraded',
+    bg: 'var(--warning-bg)',
+    color: 'var(--warning)',
+  },
+  down: { dot: 'var(--danger)', label: 'Down', bg: 'var(--danger-bg)', color: 'var(--danger)' },
+  maintenance: {
+    dot: 'var(--info)',
+    label: 'Maintenance',
+    bg: 'var(--info-bg)',
+    color: 'var(--info)',
+  },
+}
+
+const severityBorderLeft: Record<Severity, string> = {
+  critical: 'var(--danger)',
+  high: '#ea580c',
+  medium: 'var(--warning)',
+  low: 'var(--info)',
 }
 
 /* ── Stat card ─────────────────────────────────────────────────────────────── */
@@ -114,35 +142,64 @@ function StatCard({
   icon: Icon,
   label,
   value,
-  sub,
+  trend,
+  trendLabel,
   iconBg,
   iconColor,
 }: {
   icon: typeof Activity
   label: string
   value: string
-  sub: string
+  trend?: 'up' | 'down' | 'neutral'
+  trendLabel: string
   iconBg: string
   iconColor: string
 }) {
+  const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus
+  const trendColor =
+    trend === 'up' ? 'var(--success)' : trend === 'down' ? 'var(--danger)' : 'var(--text-muted)'
+
   return (
-    <div className="flex flex-col justify-between rounded-2xl border border-[var(--border)] bg-[var(--bg)] p-4 sm:p-5">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text)]">{label}</p>
-        <span
-          className={clsx(
-            'flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl',
-            iconBg,
-          )}
+    <div
+      className="flex flex-col justify-between rounded-xl p-5 transition-all duration-200"
+      style={{
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-xs)',
+      }}
+      onMouseEnter={(e) => {
+        ;(e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-md)'
+        ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'
+      }}
+      onMouseLeave={(e) => {
+        ;(e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-xs)'
+        ;(e.currentTarget as HTMLElement).style.transform = ''
+      }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <p
+          className="text-xs font-semibold uppercase tracking-widest"
+          style={{ color: 'var(--text-muted)' }}
         >
-          <Icon size={17} className={iconColor} strokeWidth={2} />
+          {label}
+        </p>
+        <span
+          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg"
+          style={{ background: iconBg }}
+        >
+          <Icon size={17} style={{ color: iconColor }} strokeWidth={2} />
         </span>
       </div>
-      <div>
-        <p className="mt-3 text-3xl font-bold tracking-tight text-[var(--text-h)]">{value}</p>
-        <p className="mt-1 flex items-center gap-1 text-xs text-[var(--text)]">
-          <ArrowUpRight size={11} className="text-emerald-500" />
-          {sub}
+      <div className="mt-4">
+        <p
+          className="text-[28px] font-bold leading-none tracking-tight"
+          style={{ color: 'var(--text-h)' }}
+        >
+          {value}
+        </p>
+        <p className="mt-2 flex items-center gap-1 text-xs" style={{ color: trendColor }}>
+          <TrendIcon size={11} />
+          <span style={{ color: 'var(--text-muted)' }}>{trendLabel}</span>
         </p>
       </div>
     </div>
@@ -150,29 +207,40 @@ function StatCard({
 }
 
 /* ── Status ping dot ───────────────────────────────────────────────────────── */
-function StatusDot({ status }: { status: ServiceStatus }) {
-  const { dot } = svcStatusConfig[status]
+function StatusPing({ status }: { status: ServiceStatus }) {
+  const { dot } = serviceStatusConfig[status]
   return (
     <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
       {status === 'operational' && (
         <span
-          className={clsx(
-            'absolute inline-flex h-full w-full animate-ping rounded-full opacity-60',
-            dot,
-          )}
+          className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-50"
+          style={{ background: dot }}
         />
       )}
-      <span className={clsx('relative inline-flex h-2.5 w-2.5 rounded-full', dot)} />
+      <span className="relative inline-flex h-2.5 w-2.5 rounded-full" style={{ background: dot }} />
     </span>
   )
 }
 
 /* ── Section header ────────────────────────────────────────────────────────── */
-function SectionTitle({ title }: { title: string }) {
+function SectionTitle({ title, count }: { title: string; count?: number }) {
   return (
-    <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--text)]">
-      {title}
-    </h2>
+    <div className="mb-3 flex items-center gap-2">
+      <h2
+        className="text-[11px] font-semibold uppercase tracking-widest"
+        style={{ color: 'var(--text-muted)' }}
+      >
+        {title}
+      </h2>
+      {count !== undefined && (
+        <span
+          className="rounded-full px-1.5 py-0.5 text-[10px] font-bold"
+          style={{ background: 'var(--code-bg)', color: 'var(--text-muted)' }}
+        >
+          {count}
+        </span>
+      )}
+    </div>
   )
 }
 
@@ -182,86 +250,136 @@ export default function Dashboard() {
   const degradedCount = mockServices.filter((s) => s.status !== 'operational').length
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="mx-auto max-w-[1400px] p-5 sm:p-6 lg:p-8">
       {/* Page header */}
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-[var(--text-h)]">Dashboard</h1>
-        <p className="mt-0.5 text-sm text-[var(--text)]">
+      <div className="mb-7">
+        <h1
+          className="text-[22px] font-bold tracking-tight"
+          style={{ color: 'var(--text-h)', letterSpacing: '-0.03em' }}
+        >
+          Dashboard
+        </h1>
+        <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
           Real-time overview of all services and incidents.
         </p>
       </div>
 
-      {/* ── Stat cards ────────────────────────────────────────────────────── */}
+      {/* ── Stat cards ──────────────────────────────────────────────────────── */}
       <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard
           icon={AlertTriangle}
           label="Open incidents"
           value={String(openCount)}
-          sub="active right now"
-          iconBg="bg-red-500/10"
-          iconColor="text-red-500"
+          trend="down"
+          trendLabel="Active right now"
+          iconBg="var(--danger-bg)"
+          iconColor="var(--danger)"
         />
         <StatCard
           icon={Server}
           label="Services down"
           value={String(degradedCount)}
-          sub={`of ${mockServices.length} services`}
-          iconBg="bg-orange-500/10"
-          iconColor="text-orange-500"
+          trend="neutral"
+          trendLabel={`of ${mockServices.length} services`}
+          iconBg="rgba(234,88,12,0.1)"
+          iconColor="#ea580c"
         />
         <StatCard
           icon={Activity}
           label="Avg uptime"
           value="97.8%"
-          sub="over last 7 days"
-          iconBg="bg-emerald-500/10"
-          iconColor="text-emerald-500"
+          trend="up"
+          trendLabel="Last 7 days"
+          iconBg="var(--success-bg)"
+          iconColor="var(--success)"
         />
         <StatCard
           icon={Users}
           label="On-call"
           value="1"
-          sub="engineer active"
-          iconBg="bg-[var(--accent-bg)]"
-          iconColor="text-[var(--accent)]"
+          trend="neutral"
+          trendLabel="Engineer active"
+          iconBg="var(--accent-bg)"
+          iconColor="var(--accent)"
         />
       </div>
 
-      {/* ── Latency chart ─────────────────────────────────────────────────── */}
-      <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--bg)] p-4 sm:p-5">
-        <div className="mb-4 flex items-center justify-between">
+      {/* ── Latency chart ───────────────────────────────────────────────────── */}
+      <div
+        className="mb-6 rounded-xl p-5"
+        style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          boxShadow: 'var(--shadow-xs)',
+        }}
+      >
+        <div className="mb-5 flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-sm font-semibold text-[var(--text-h)]">API Gateway — Latency</h2>
-            <p className="mt-0.5 text-xs text-[var(--text)]">Last 24 hours · p50 / p95 / p99</p>
+            <h2
+              className="text-sm font-semibold"
+              style={{ color: 'var(--text-h)', letterSpacing: '-0.01em' }}
+            >
+              API Gateway — Latency
+            </h2>
+            <p className="mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+              Last 24 hours · p50 / p95 / p99
+            </p>
           </div>
-          <span className="rounded-full border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--text)]">
-            24h
-          </span>
+          <div className="flex items-center gap-4 text-xs" style={{ color: 'var(--text-muted)' }}>
+            <span className="flex items-center gap-1.5">
+              <span
+                className="inline-block h-0.5 w-4 rounded"
+                style={{ background: 'var(--accent)' }}
+              />
+              p50
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span
+                className="inline-block h-0.5 w-4 rounded border-dashed"
+                style={{ borderTop: '2px dashed #f97316' }}
+              />
+              p95
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span
+                className="inline-block h-0.5 w-4 rounded"
+                style={{ borderTop: '2px dashed var(--danger)' }}
+              />
+              p99
+            </span>
+          </div>
         </div>
         <ResponsiveContainer width="100%" height={160} className="sm:!h-[200px]">
-          <AreaChart data={latencyData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+          <AreaChart data={latencyData} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
             <defs>
               <linearGradient id="gp50" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.2} />
+                <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.18} />
                 <stop offset="95%" stopColor="var(--accent)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="time" tick={{ fontSize: 10, fill: 'var(--text)' }} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" strokeOpacity={0.7} />
+            <XAxis
+              dataKey="time"
+              tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
+              tickLine={false}
+              axisLine={false}
+            />
             <YAxis
-              tick={{ fontSize: 10, fill: 'var(--text)' }}
+              tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
               tickLine={false}
               axisLine={false}
               unit="ms"
             />
             <Tooltip
               contentStyle={{
-                background: 'var(--bg)',
+                background: 'var(--surface)',
                 border: '1px solid var(--border)',
                 borderRadius: 10,
                 fontSize: 12,
                 color: 'var(--text-h)',
+                boxShadow: 'var(--shadow-md)',
               }}
+              cursor={{ stroke: 'var(--border)', strokeWidth: 1 }}
             />
             <Area
               type="monotone"
@@ -270,6 +388,7 @@ export default function Dashboard() {
               fill="url(#gp50)"
               strokeWidth={2}
               name="p50"
+              dot={false}
             />
             <Area
               type="monotone"
@@ -277,46 +396,61 @@ export default function Dashboard() {
               stroke="#f97316"
               fill="none"
               strokeWidth={1.5}
-              strokeDasharray="4 2"
+              strokeDasharray="5 3"
               name="p95"
+              dot={false}
             />
             <Area
               type="monotone"
               dataKey="p99"
-              stroke="#ef4444"
+              stroke="var(--danger)"
               fill="none"
               strokeWidth={1.5}
-              strokeDasharray="2 2"
+              strokeDasharray="3 3"
               name="p99"
+              dot={false}
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      {/* ── Bottom grid ───────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
+      {/* ── Bottom grid ─────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         {/* Service health */}
         <div className="lg:col-span-2">
-          <SectionTitle title="Service Health" />
+          <SectionTitle title="Service Health" count={mockServices.length} />
           <div className="flex flex-col gap-2">
             {mockServices.map((svc) => {
-              const cfg = svcStatusConfig[svc.status]
+              const cfg = serviceStatusConfig[svc.status]
               return (
                 <div
                   key={svc.id}
-                  className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3"
+                  className="flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3.5 transition-all duration-150"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                  onMouseEnter={(e) => {
+                    ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border-strong)'
+                    ;(e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-sm)'
+                  }}
+                  onMouseLeave={(e) => {
+                    ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
+                    ;(e.currentTarget as HTMLElement).style.boxShadow = ''
+                  }}
                 >
-                  <StatusDot status={svc.status} />
+                  <StatusPing status={svc.status} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-[var(--text-h)]">
+                    <p
+                      className="truncate text-sm font-semibold"
+                      style={{ color: 'var(--text-h)' }}
+                    >
                       {svc.name}
                     </p>
-                    <p className="mt-0.5 text-xs text-[var(--text)]">
+                    <p className="mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>
                       {svc.uptime}% uptime · {svc.latency.p50}ms p50 · {svc.errorRate}% err
                     </p>
                   </div>
                   <span
-                    className={clsx('rounded-full px-2.5 py-0.5 text-xs font-semibold', cfg.badge)}
+                    className="flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
+                    style={{ background: cfg.bg, color: cfg.color }}
                   >
                     {cfg.label}
                   </span>
@@ -330,56 +464,99 @@ export default function Dashboard() {
         <div className="flex flex-col gap-5">
           {/* Active incidents */}
           <div>
-            <SectionTitle title="Active Incidents" />
+            <SectionTitle
+              title="Active Incidents"
+              count={mockIncidents.filter((i) => i.status !== 'resolved').length}
+            />
             <div className="flex flex-col gap-2">
-              {mockIncidents.map((inc) => (
-                <div
-                  key={inc.id}
-                  className="rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3"
-                >
-                  <p className="mb-2 text-sm font-medium leading-snug text-[var(--text-h)]">
-                    {inc.title}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span
-                      className={clsx(
-                        'rounded-full px-2 py-0.5 text-xs font-semibold',
-                        severityColor[inc.severity],
-                      )}
+              {mockIncidents.map((inc) => {
+                const sev = severityConfig[inc.severity]
+                const sta = incidentStatusConfig[inc.status]
+                return (
+                  <div
+                    key={inc.id}
+                    className="cursor-pointer rounded-xl px-4 py-3.5 transition-all duration-150"
+                    style={{
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border)',
+                      borderLeft: `3px solid ${severityBorderLeft[inc.severity]}`,
+                    }}
+                    onMouseEnter={(e) => {
+                      ;(e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-sm)'
+                    }}
+                    onMouseLeave={(e) => {
+                      ;(e.currentTarget as HTMLElement).style.boxShadow = ''
+                    }}
+                  >
+                    <p
+                      className="text-sm font-medium leading-snug"
+                      style={{ color: 'var(--text-h)' }}
                     >
-                      {inc.severity}
-                    </span>
-                    <span
-                      className={clsx(
-                        'rounded-full px-2 py-0.5 text-xs font-semibold',
-                        incStatusColor[inc.status],
-                      )}
-                    >
-                      {inc.status}
-                    </span>
-                    <span className="text-xs text-[var(--text)]">
-                      {formatDistanceToNow(new Date(inc.createdAt), { addSuffix: true })}
-                    </span>
+                      {inc.title}
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                      <span
+                        className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                        style={{
+                          background: sev.bg,
+                          color: sev.color,
+                          border: `1px solid ${sev.border}`,
+                        }}
+                      >
+                        {inc.severity}
+                      </span>
+                      <span
+                        className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                        style={{ background: sta.bg, color: sta.color }}
+                      >
+                        {inc.status}
+                      </span>
+                      <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                        {formatDistanceToNow(new Date(inc.createdAt), { addSuffix: true })}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
           {/* On-call team */}
           <div>
-            <SectionTitle title="On-Call Team" />
+            <SectionTitle title="On-Call Team" count={mockTeam.length} />
             <div className="flex flex-col gap-2">
               {mockTeam.map((m) => (
                 <div
                   key={m.name}
-                  className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3"
+                  className="flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-150"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                  onMouseEnter={(e) => {
+                    ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border-strong)'
+                  }}
+                  onMouseLeave={(e) => {
+                    ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
+                  }}
                 >
                   <Avatar name={m.name} size="sm" status={m.status} />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-[var(--text-h)]">{m.name}</p>
-                    <p className="text-xs text-[var(--text)]">{m.role}</p>
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className="truncate text-sm font-semibold"
+                      style={{ color: 'var(--text-h)' }}
+                    >
+                      {m.name}
+                    </p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      {m.role}
+                    </p>
                   </div>
+                  {m.status === 'online' && (
+                    <span
+                      className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                      style={{ background: 'var(--success-bg)', color: 'var(--success)' }}
+                    >
+                      Active
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
