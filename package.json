@@ -1,7 +1,20 @@
 {
   "name": "sentri-ui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Sentri UI — alerting and incident management component library",
+  "author": {
+    "name": "Aditya",
+    "email": "aditya@meratractor.com"
+  },
+  "keywords": [
+    "react",
+    "ui",
+    "components",
+    "incident-management",
+    "alerting",
+    "sentri"
+  ],
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
