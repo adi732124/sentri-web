@@ -1,0 +1,134 @@
+/* Full-page Suspense fallback */
+.page-loader {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.page-loader--inline {
+  min-height: unset;
+  padding: 24px;
+}
+
+/* Pulse animation */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.skeleton {
+  background: var(--border);
+  border-radius: 6px;
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+}
+
+/* Top bar */
+.page-loader__bar {
+  height: 56px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+}
+
+/* Content area */
+.page-loader__content {
+  display: flex;
+  flex: 1;
+  gap: 0;
+}
+
+/* Sidebar */
+.page-loader__sidebar {
+  width: 220px;
+  min-height: calc(100vh - 56px);
+  border-right: 1px solid var(--border);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.skeleton--title {
+  height: 28px;
+  width: 120px;
+  margin-bottom: 8px;
+}
+
+.skeleton--nav {
+  height: 36px;
+  border-radius: 6px;
+}
+
+/* Main */
+.page-loader__main {
+  flex: 1;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 900px;
+}
+
+.skeleton--heading {
+  height: 36px;
+  width: 260px;
+}
+
+.skeleton--subtitle {
+  height: 18px;
+  width: 380px;
+  opacity: 0.7;
+}
+
+/* Cards row */
+.page-loader__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.page-loader__card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton--card-title {
+  height: 20px;
+  width: 60%;
+}
+
+.skeleton--line {
+  height: 14px;
+  width: 100%;
+  opacity: 0.8;
+}
+
+.skeleton--line-short {
+  width: 70%;
+}
+
+.skeleton--block {
+  height: 180px;
+  width: 100%;
+  border-radius: 10px;
+  margin-top: 8px;
+}
+
+/* Staggered animation delays for a more natural feel */
+.page-loader__sidebar .skeleton:nth-child(2) { animation-delay: 0.1s; }
+.page-loader__sidebar .skeleton:nth-child(3) { animation-delay: 0.2s; }
+.page-loader__sidebar .skeleton:nth-child(4) { animation-delay: 0.3s; }
+.page-loader__sidebar .skeleton:nth-child(5) { animation-delay: 0.4s; }
+.page-loader__sidebar .skeleton:nth-child(6) { animation-delay: 0.5s; }
+
+.page-loader__card:nth-child(2) .skeleton { animation-delay: 0.15s; }
+.page-loader__card:nth-child(3) .skeleton { animation-delay: 0.3s; }

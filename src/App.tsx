@@ -2,10 +2,12 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
+import { Button, Card, Badge, Input, Avatar } from './components'
 import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
+  const [email, setEmail] = useState('')
 
   return (
     <>
@@ -17,100 +19,103 @@ function App() {
         </div>
         <div>
           <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
+          <p>Edit <code>src/App.tsx</code> and save to test <code>HMR</code></p>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+
+        <Button
+          variant="primary"
+          size="md"
+          onClick={() => setCount((c) => c + 1)}
         >
           Count is {count}
-        </button>
+        </Button>
       </section>
 
       <div className="ticks"></div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
+      {/* Component showcase */}
+      <section id="next-steps" style={{ flexDirection: 'column', gap: 40, padding: '32px 24px' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: 0 }}>Component Library</h2>
+
+        {/* Buttons */}
+        <Card title="Button" description="4 variants · 3 sizes · loading & disabled states">
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+            <Button variant="primary">Primary</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="ghost">Ghost</Button>
+            <Button variant="danger">Danger</Button>
+            <Button variant="primary" size="sm">Small</Button>
+            <Button variant="primary" size="lg">Large</Button>
+            <Button variant="primary" loading>Saving…</Button>
+            <Button variant="ghost" disabled>Disabled</Button>
+          </div>
+        </Card>
+
+        {/* Badges */}
+        <Card title="Badge" description="5 semantic variants with optional dot indicator">
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+            <Badge variant="success" dot>Online</Badge>
+            <Badge variant="warning">Degraded</Badge>
+            <Badge variant="error">Outage</Badge>
+            <Badge variant="info">Beta</Badge>
+            <Badge variant="neutral">Draft</Badge>
+          </div>
+        </Card>
+
+        {/* Avatars */}
+        <Card title="Avatar" description="5 sizes · initials fallback · 4 status indicators">
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+            <Avatar name="Aditya Kumar" size="xl" status="online" />
+            <Avatar name="Vivek S" size="lg" status="busy" />
+            <Avatar name="John D" size="md" status="away" />
+            <Avatar name="Anna B" size="sm" status="offline" />
+            <Avatar name="X" size="xs" />
+          </div>
+        </Card>
+
+        {/* Input */}
+        <Card title="Input" description="Label · hint · error · icon slots">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 360 }}>
+            <Input
+              label="Email address"
+              placeholder="you@example.com"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              hint="We'll never share your email."
+            />
+            <Input
+              label="Password"
+              type="password"
+              placeholder="••••••••"
+              error="Password must be at least 8 characters."
+            />
+          </div>
+        </Card>
+
+        {/* Cards */}
+        <Card title="Card" description="Composable container with header, body, and footer">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+            <Card title="Bordered" description="Default card style" bordered>
+              Body content here.
+            </Card>
+            <Card title="Shadow" description="Elevated card" shadow bordered={false}>
+              Body content here.
+            </Card>
+            <Card
+              title="With footer"
+              description="Actions in the footer"
+              footer={
+                <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
+                  <Button variant="ghost" size="sm">Cancel</Button>
+                  <Button variant="primary" size="sm">Save</Button>
+                </div>
+              }
+            >
+              Confirmation content.
+            </Card>
+          </div>
+        </Card>
       </section>
 
       <div className="ticks"></div>
