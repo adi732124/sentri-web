@@ -13,7 +13,12 @@ const inc: Incident = {
 }
 
 describe('incidents.store', () => {
-  beforeEach(() => useIncidentsStore.setState({ incidents: [], filter: { search: '', severity: 'all', status: 'all' } }))
+  beforeEach(() =>
+    useIncidentsStore.setState({
+      incidents: [],
+      filter: { search: '', severity: 'all', status: 'all' },
+    }),
+  )
 
   it('setIncidents replaces list', () => {
     useIncidentsStore.getState().setIncidents([inc])

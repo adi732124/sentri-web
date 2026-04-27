@@ -26,5 +26,3 @@ describe('AlertBanner', () => {
     expect(screen.queryByText('visible')).not.toBeInTheDocument()
   })
 })
-
-
