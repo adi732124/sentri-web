@@ -1,29 +1,5 @@
 import { Link } from 'react-router-dom'
 
-const teasers = [
-  {
-    icon: '⚡',
-    title: 'Six core features',
-    body: 'Live incident feed, service health dashboards, on-call scheduling, team activity timeline, auto-escalation, and multi-workspace RBAC — each with full What / Why / How breakdowns.',
-    link: '/features',
-    cta: 'Explore features →',
-  },
-  {
-    icon: '🏗️',
-    title: 'Production architecture',
-    body: 'WebSocket + Redis pub/sub for sub-100ms delivery, polyglot persistence (PostgreSQL + MongoDB + Redis), JWT rotation, and Docker-based CI/CD.',
-    link: '/architecture',
-    cta: 'See architecture →',
-  },
-  {
-    icon: '🧰',
-    title: 'Modern tech stack',
-    body: 'React 18, Vite, Zustand, Node.js, Express, Socket.io, Bull, Prisma, Mongoose — every technology justified by a concrete requirement, not novelty.',
-    link: '/stack',
-    cta: 'View full stack →',
-  },
-]
-
 const problems = [
   { icon: '🔀', label: 'Context-switching', sub: '3–4 tools open at once' },
   { icon: '🐌', label: 'Delayed response', sub: 'Alerts siloed in PagerDuty' },
@@ -222,74 +198,310 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Detail teasers ────────────────────────────────────────────────── */}
-      <section style={{ padding: '24px 24px 72px', maxWidth: 880, margin: '0 auto' }}>
-        <h2
-          style={{
-            textAlign: 'center',
-            fontSize: 'clamp(20px, 3.5vw, 30px)',
-            fontWeight: 700,
-            letterSpacing: '-0.03em',
-            color: 'var(--text-h)',
-            marginBottom: 36,
-          }}
-        >
-          Go deeper
-        </h2>
+      {/* ─── Features teaser ───────────────────────────────────────────────── */}
+      <section style={{ padding: '24px 24px 48px', maxWidth: 880, margin: '0 auto' }}>
+        <Link to="/features" style={{ textDecoration: 'none' }}>
+          <div
+            style={{
+              padding: '28px 28px',
+              borderRadius: 'var(--radius-xl)',
+              border: '1px solid var(--border)',
+              background: 'var(--surface)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 20,
+              transition: 'box-shadow var(--transition), transform var(--transition)',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+              e.currentTarget.style.transform = 'translateY(-2px)'
+              e.currentTarget.style.borderColor = 'var(--accent-border)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = 'none'
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.borderColor = 'var(--border)'
+            }}
+          >
+            <span style={{ fontSize: 36, flexShrink: 0 }}>⚡</span>
+            <div style={{ flex: 1 }}>
+              <h3
+                style={{
+                  fontSize: 16,
+                  fontWeight: 700,
+                  color: 'var(--text-h)',
+                  letterSpacing: '-0.02em',
+                  marginBottom: 6,
+                }}
+              >
+                Six core features
+              </h3>
+              <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.65, margin: 0 }}>
+                Live incident feed, service health dashboards, on-call scheduling, team activity
+                timeline, auto-escalation, and multi-workspace RBAC — each with full What / Why /
+                How breakdowns.
+              </p>
+            </div>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent)', flexShrink: 0 }}>
+              Explore features →
+            </span>
+          </div>
+        </Link>
+      </section>
+
+      {/* ─── Why We Built This ─────────────────────────────────────────────── */}
+      <section
+        style={{
+          padding: '72px 24px',
+          maxWidth: 880,
+          margin: '0 auto',
+          borderTop: '1px solid var(--border)',
+        }}
+      >
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: 16,
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: 48,
+            alignItems: 'center',
           }}
         >
-          {teasers.map((t) => (
-            <Link key={t.title} to={t.link} style={{ textDecoration: 'none' }}>
+          <div>
+            <div
+              style={{
+                display: 'inline-block',
+                marginBottom: 16,
+                padding: '4px 12px',
+                borderRadius: 99,
+                border: '1px solid var(--accent-border)',
+                background: 'var(--accent-bg)',
+                fontSize: 11,
+                fontWeight: 700,
+                color: 'var(--accent)',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Why we built this
+            </div>
+            <h2
+              style={{
+                fontSize: 'clamp(22px, 3.5vw, 32px)',
+                fontWeight: 800,
+                letterSpacing: '-0.03em',
+                color: 'var(--text-h)',
+                lineHeight: 1.2,
+                marginBottom: 16,
+              }}
+            >
+              Born from the frustration of context-switching during live incidents
+            </h2>
+            <p
+              style={{
+                fontSize: 14,
+                color: 'var(--text)',
+                lineHeight: 1.75,
+                marginBottom: 16,
+              }}
+            >
+              Every major incident we responded to followed the same painful pattern: one tab for
+              metrics, another for alerts, a Slack thread spiraling out of control, and a Linear
+              ticket nobody had time to update. By the time we assembled the full picture, precious
+              minutes had already been lost.
+            </p>
+            <p
+              style={{
+                fontSize: 14,
+                color: 'var(--text)',
+                lineHeight: 1.75,
+              }}
+            >
+              Sentri was built to collapse that stack into a single real-time surface — so on-call
+              engineers can focus on fixing the problem, not hunting for context across four tools.
+            </p>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+            }}
+          >
+            {[
+              {
+                icon: '🎯',
+                title: 'Single source of truth',
+                body: 'Every alert, metric, schedule change, and team note in one place — no syncing, no duplication.',
+              },
+              {
+                icon: '⏱️',
+                title: 'Seconds, not minutes',
+                body: 'Sub-100ms real-time updates mean your dashboard reflects reality the moment it changes.',
+              },
+              {
+                icon: '🤝',
+                title: 'Built for the whole team',
+                body: 'Engineers, managers, and stakeholders each get the view they need without stepping on each other.',
+              },
+            ].map((item) => (
               <div
+                key={item.title}
                 style={{
-                  padding: '28px 24px',
-                  borderRadius: 'var(--radius-xl)',
+                  padding: '18px 20px',
+                  borderRadius: 'var(--radius-lg)',
                   border: '1px solid var(--border)',
                   background: 'var(--surface)',
-                  height: '100%',
-                  boxSizing: 'border-box',
-                  transition: 'box-shadow var(--transition), transform var(--transition)',
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: 12,
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = 'var(--shadow-md)'
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                  e.currentTarget.style.borderColor = 'var(--accent-border)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = 'none'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.borderColor = 'var(--border)'
+                  gap: 14,
+                  alignItems: 'flex-start',
                 }}
               >
-                <span style={{ fontSize: 32 }}>{t.icon}</span>
-                <h3
+                <span style={{ fontSize: 22, flexShrink: 0, marginTop: 1 }}>{item.icon}</span>
+                <div>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: 'var(--text-h)',
+                      marginBottom: 4,
+                    }}
+                  >
+                    {item.title}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.6 }}>
+                    {item.body}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── About Us ──────────────────────────────────────────────────────── */}
+      <section
+        style={{
+          padding: '72px 24px',
+          borderTop: '1px solid var(--border)',
+          background: 'var(--surface)',
+        }}
+      >
+        <div style={{ maxWidth: 880, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <div
+              style={{
+                display: 'inline-block',
+                marginBottom: 16,
+                padding: '4px 12px',
+                borderRadius: 99,
+                border: '1px solid var(--accent-border)',
+                background: 'var(--accent-bg)',
+                fontSize: 11,
+                fontWeight: 700,
+                color: 'var(--accent)',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+              }}
+            >
+              About us
+            </div>
+            <h2
+              style={{
+                fontSize: 'clamp(22px, 3.5vw, 32px)',
+                fontWeight: 800,
+                letterSpacing: '-0.03em',
+                color: 'var(--text-h)',
+                lineHeight: 1.2,
+                marginBottom: 14,
+              }}
+            >
+              A small team obsessed with developer experience
+            </h2>
+            <p
+              style={{
+                fontSize: 14,
+                color: 'var(--text)',
+                lineHeight: 1.75,
+                maxWidth: 560,
+                margin: '0 auto',
+              }}
+            >
+              We're engineers who have been on-call, run postmortems, and felt the pain of
+              fragmented tooling firsthand. Sentri is the platform we always wished existed.
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: 16,
+              marginBottom: 40,
+            }}
+          >
+            {[
+              {
+                stat: '100ms',
+                label: 'Real-time event delivery',
+                sub: 'WebSocket + Redis pub/sub',
+              },
+              { stat: '6', label: 'Core features shipped', sub: 'From incident to RBAC' },
+              { stat: '1', label: 'Unified workspace', sub: 'Replaces 4+ tools' },
+              { stat: '0', label: 'Vendor lock-in', sub: 'Open, composable design' },
+            ].map((s) => (
+              <div
+                key={s.stat}
+                style={{
+                  padding: '24px 20px',
+                  borderRadius: 'var(--radius-lg)',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg)',
+                  textAlign: 'center',
+                }}
+              >
+                <div
                   style={{
-                    fontSize: 16,
-                    fontWeight: 700,
-                    color: 'var(--text-h)',
-                    letterSpacing: '-0.02em',
+                    fontSize: 32,
+                    fontWeight: 800,
+                    color: 'var(--accent)',
+                    letterSpacing: '-0.04em',
+                    marginBottom: 4,
                   }}
                 >
-                  {t.title}
-                </h3>
-                <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.65, flex: 1 }}>
-                  {t.body}
-                </p>
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent)' }}>
-                  {t.cta}
-                </span>
+                  {s.stat}
+                </div>
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'var(--text-h)',
+                    marginBottom: 2,
+                  }}
+                >
+                  {s.label}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.sub}</div>
               </div>
-            </Link>
-          ))}
+            ))}
+          </div>
+
+          <div
+            style={{
+              padding: '24px 28px',
+              borderRadius: 'var(--radius-xl)',
+              border: '1px solid var(--accent-border)',
+              background: 'var(--accent-bg)',
+              fontSize: 14,
+              lineHeight: 1.75,
+              color: 'var(--text)',
+            }}
+          >
+            <strong style={{ color: 'var(--accent)' }}>Our philosophy:</strong> every design
+            decision in Sentri starts with a real problem that real on-call engineers face. We don't
+            add features because they look impressive — we add them because a teammate once had to
+            work around their absence at 2 AM.
+          </div>
         </div>
       </section>
 
